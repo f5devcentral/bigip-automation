@@ -6,7 +6,7 @@ For F5 administrators, leveraging Terraform with AS3 can drastically reduce the 
 
 In this article, we'll explore how to automate the configuration of F5 application services using Terraform and F5's AS3 Per-App templates. We have created multiple Terraform modules, each corresponding to a specific AS3 template. Currently for this example, we have created two modules for HTTP and HTTPS configurations. When these modules are invoked from the main module, they automate the creation of application configurations on the F5 device. This approach simplifies the deployment process and makes it easier to manage and scale applications.
 
-![terraform-f5](https://github.com/skenderidis/bigip-automation/terraform-f5.png)
+![terraform-f5](terraform-f5.png)
 
 # Table of Contexts
 
