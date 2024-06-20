@@ -1,230 +1,35 @@
-# Automating BIGIP configuration with Terraform and Per-App AS3
+# Automating BIGIP with Per-App AS3 and Terraform
 
-In the modern era of IT, automation and infrastructure as code (IaC) have become pivotal in streamlining operations and enhancing the agility of organizations. Terraform, an open-source IaC tool, allows administrators to define and provision infrastructure using a high-level configuration language. When combined with F5 Networks' Application Services 3 (AS3), a declarative configuration API for BIG-IP, the result is a powerful solution for managing application services more efficiently and consistently.
+In the modern era of IT, automation and infrastructure as code (IaC) have become pivotal in streamlining operations and enhancing the agility of organizations. Terraform, an open-source IaC tool, allows administrators to define and provision infrastructure using a high-level configuration language. When combined with F5 Per App AS3, a declarative configuration API for BIG-IP, the result is a powerful solution for managing application services more efficiently and consistently.
 
 For F5 administrators, leveraging Terraform with AS3 can drastically reduce the time and effort required to deploy and manage application services. Automation not only minimizes human errors but also ensures that configurations are consistent across different environments. This enables organizations to respond quickly to changing business needs, scale their operations seamlessly, and maintain a high level of operational efficiency.
 
-In this article, we'll explore how to automate the configuration of F5 application services using Terraform and F5's AS3 Per-App templates. We have created multiple Terraform modules, each corresponding to a specific AS3 template. Currently for this example, we have created two modules for HTTP and HTTPS configurations. When these modules are invoked from the main module, they automate the creation of application configurations on the F5 device. This approach simplifies the deployment process and makes it easier to manage and scale applications.
+In this repository, we will explore four use cases, each being the evolution of the previous, demonstrating how customers can build  their own automation framework. Each use case offers a different level of automation and also provides additional benefits, such as  code version control, code reviews, and many more. This way, customers can choose the one that best fits their knowledge and experience with these tools. Whether you are new to automation or already skilled in IaC practices, these examples will help you make your deployment processes easier and more efficient.
 
-![terraform-f5](terraform-f5.png)
+Building an Automation Framework (Stages/Levels)
 
-# Table of Contexts
+- [Level 1 - Per App AS3 with Terraform](level-1/README.md)
+- [Level 2 - Introducing GIT](#level-2.md)
+- [Level 3 - Using Pipelines](#technologies-used)
+- [Level 4 - Collaborating with Merge Requests](#technologies-used)
+- [Level 5 - Self Service Deployments](#technologies-used)
 
-- [Technologies used](#technologies-used)
-- [Code Explanation](#code-explanation)
-  - [AS3_HTTP Module](#as3_http-module)
-  - [AS3_HTTPS Module](#as3_https-module)
-  - [Main Module](#main-module)
-- [Best Practicies](#best-practices)
-  - [Deploying Services with Terraform](#deploying-services-with-terraform)
-  - [Terraform Plan parameters](#terraform-plan-parameters)
-  - [Terraform Apply parameters](#terraform-apply-parameters)
-- [Demo](#Demo)
 
-# Technologies used
+## Technologies used
 
-To create this automation use-case, we leverage the following technologies:
+To create this automation use-case, we leverage the following 4 technologies:
 
-- **AS3**. AS3 furnishes a declarative interface, enabling the management of application-specific configurations on a BIG-IP system. By providing a JSON declaration rather than a series of imperative commands, AS3 ensures precise configuration orchestration. We utilize the latest Per-App AS3 feature to optimize configuration granularity. You can find more information on [https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/)
+- **AS3**. AS3 provides a declarative interface, enabling the management of application-specific configurations on a BIG-IP system. By providing a JSON declaration rather than a series of imperative commands, AS3 ensures precise configuration orchestration. We utilize the latest Per-App AS3 feature to optimize configuration granularity. You can find more information on [https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/)
 
 - **F5 BIG-IP Terraform Provider**. The F5 BIG-IP Terraform Provider helps you manage and provision your BIG-IP configurations in Terraform through the use of AS3/DO integration.You can find more information on [https://registry.terraform.io/providers/F5Networks/bigip/latest/docs](https://registry.terraform.io/providers/F5Networks/bigip/latest/docs)
 
 
-## Code Explanation
-In the following section, we will provide a detailed explanation of the code that forms the foundation of this automation framework. This will help you understand how the various components work together to automate the configuration of F5 application services using Terraform and AS3 templates.
+- **Git**. Git serves as the backbone of our GitOps approach, acting as the repository for storing desired configurations. It not only serves as the source of truth for AS3 configurations but also provides an audit trail of all changes made throughout the application lifecycle and enables collaboration and code reviews through the use merge requests.
 
-### *AS3_HTTP* Module
-The HTTP module is designed to create an HTTP VirtualServer configuration on a BIGIP device using AS3 Per-App templates. The files for this module can be found under the directory ***`code->modules->as3_http`***.
+- **CI/CD**. A Continuous Integration and Continuous Deployment (CI/CD) tool is crucial in automating the changes that have been identified in configuration files throughout the application lifecycle. Not only it can orchestrate the deployment of AS3 declarations with Terraform, but also integrate with 3rd party 
+ersion of YAML configurations into AS3 declarations using Jinja2 templates, and subsequent deployment of changes to the BIG-IP repositories. Additionally, CI/CD orchestrates the deployment of AS3 declarations to BIG-IP and other automation workflows, ensuring a seamless and efficient process.
 
-Here is an overview of the files and their roles:
-
-**main.tf**
-
-The **main.tf** file contains the Terraform configuration that creates the HTTP VirtualServer. Below is a detailed breakdown of its contents:
-- The first block defines the version of the F5 BIG-IP provider that will be used.
-- The second block uses the **f5bigip_as3** resource to deploy the AS3 Application. The `as3_json` parameter is populated by a template file (as3.tpl), which is passed variables like tenant, application name, service port, pool members and other variables.
-- The third block outputs the response from the F5 device after deploying the configuration.
-
-```tf
-terraform {
-  required_providers {
-    bigip = {
-      source = "F5Networks/bigip"
-      version = "1.22.0"
-    }
-  }
-}
-
-resource "bigip_as3" "as3" {
-  tenant_name= var.partition
-  tenant_filter= var.partition
-  ignore_metadata = true
-  as3_json = templatefile("${path.module}/as3.tpl", {
-    name            = var.name
-    virtualIP       = var.virtualIP
-    virtualPort     = var.virtualPort
-    serverAddresses = var.serverAddresses
-    servicePort     = var.servicePort
-  })
-}
-
-output "as3" {
-  value = bigip_as3.as3
-}
-```
-
-**as3.tpl**
-
-The as3.tpl file is an AS3 template used to define the HTTP application. This template performs the following tasks:
-
- - Defines an AS3 declaration for an HTTP application.
- - Creates a tenant and an application within that tenant.
- - Configures an HTTP service with a virtual address and associates it with a pool of servers.
- - Uses variables for tenant, application name, virtual address, service port, and pool members, allowing for flexible and reusable config
-
-```tf
-{
-  "${name}": {
-    "class": "Application",
-    "service": {
-      "class": "Service_HTTP",
-      "virtualAddresses": [
-        "${virtualIP}"
-      ],
-      ${virtualPort == 0 ? "\"virtualPort\": 80," : "\"virtualPort\": ${virtualPort},"}
-      "pool": "pool_${name}"
-    },
-    "pool_${name}": {
-      "class": "Pool",
-      "members": [
-        {
-          "servicePort": ${servicePort},
-          "shareNodes": true,
-          "serverAddresses": ${jsonencode(serverAddresses)}
-        }
-      ]
-    }
-  }
-}
-```
-**variables.tf**
-
-The variables.tf defines the variables that will be used by the `as3.tpl` on this module:
-
-```tf
-###########   AS3 Variables   ############
-variable partition	{
-  description = "Partition that the AS3 will be deployed to"
-  type        = string
-}
-variable name	{
-  description = "Name of the Virtual Server"
-  type        = string
-}
-variable virtualIP	{
-  description = "IP for Virtual Server"
-  type        = string
-}
-variable virtualPort  {
-  description = "Port for Virtual Server"
-  type        = number  
-  default     = 0
-}
-variable serverAddresses  {
-  description = "List of IPs for Pool Members"
-  type        = list(string)
-}
-variable servicePort  {
-  description = "Port of the Pool Members"
-  type        = number
-}
-
-```
-
-### *AS3_HTTPS* Module
-The HTTPS module is designed to create an HTTPS Virtual Server configuration on a BIGIP device using AS3 Per-App templates. This module is exactly like the previous module (AS3_HTTP) but with a different template and variable that define the Client SSL Profile that is stored on Common Partition. The files for this module can be found under the directory ***`code->modules->as3_https`***.
-
-
-### *Main* Module
-The main module orchestrates the deployment of the HTTP and HTTPS VirtualServer configurations on the F5 device by invoking the respective modules. For each VirtualServer you want to create, you will need to create a separate `appX.tf` file (or append the relevant configuration on the existing file). Additionally, the main module includes the `providers.tf` file that defines multiple F5 BIG-IP providers, each corresponding to a single BIGIP device. 
-
-
-**appX.tf**
-
-```tf
-module "appX" {
-    source              = "./modules/as3_http"
-    name                = "appX"
-    virtualIP           = "10.1.120.112"
-    virtualPort         = 80
-    serverAddresses     = ["10.1.20.10", "10.1.20.11"]
-    servicePort         = 80
-    partition            = "test1"
-    providers = {
-      bigip = bigip.dmz
-    }    
-}
-
-#
-resource "local_file" "output" {
-  filename = "declarations/${module.appX.as3.tenant_name}/${module.appX.as3.application_list}.json"
-  content  = module.appX.as3.as3_json
-  depends_on = [module.appX]
-}
-
-resource "null_resource" "json_beautify" {
-  provisioner "local-exec" {
-    when    = create
-    command = "jq . declarations/${module.appX.as3.tenant_name}/${module.appX.as3.application_list}.json > declarations/${module.appX.as3.tenant_name}/${module.appX.as3.application_list}.json"
-  }
-}
-
-```
-
-This configuration does the following:
-
- - Invokes the HTTP/S module with the relevant variables to deploy an HTTP application.
- - Defines the providers that will deploy this service.
- - Outputs the JSON AS3 to a folder.
- - Re-formats the JSON AS3 with `jq`.
-
-
-**providers.tf**
-
-```tf
-terraform {
-  required_providers {
-    bigip = {
-      source = "F5Networks/bigip"
-      version = "1.22.0"
-    }
-  }
-}
-
-provider "bigip" {
-    address = "10.1.10.215"
-    username = "admin"
-    password = "passwordXYZ"
-    alias=  "dmz"
-}
-
-provider "bigip" {
-    address = "10.1.20.112"
-    username = "admin"
-    password = "passwordXYZ"
-    alias=  "azure"
-}
-
-provider "bigip" {
-    address = "10.1.50.98"
-    username = "admin"
-    password = "passwordXYZ"
-    alias=  "aws"
-}
-```
-
-The `providers.tf` file defines the F5 BIG-IP providers, allowing you to manage multiple F5 devices using provider aliases. This enables you to deploy configurations to different devices by specifying the appropriate provider alias.
-
+By combining these components into a cohesive automation framework, organizations can achieve greater agility, scalability, and reliability in managing their F5 BIG-IP deployments. This approach empowers teams to focus on innovation and value delivery, while automation handles the repetitive and error-prone tasks associated with infrastructure configuration and deployment.
 
 
 
@@ -312,7 +117,7 @@ Plan: 0 to add, 1 to change, 0 to destroy.
 By examining the output of terraform plan, you can verify that the planned changes match your intentions. This step is crucial for ensuring that your updates are applied correctly and that no unintended modifications occur. It provides a clear and detailed preview of the infrastructure changes, enhancing your control over the deployment process.
 
 
-### Best Practices
+### Best Practices when used with BIGIP TMOS
 
 When deploying a configuration with Terraform is it already recommended to run **`terraform plan`** first. The **terraform plan** command creates a plan consisting of a set of changes that will make your resources match your configuration. This lets you preview the actions Terraform would take to modify your infrastructure before applying them.
 
@@ -350,8 +155,3 @@ Sequential Execution: Just like with the terraform plan command, the -parallelis
 "tfplan"
 
 Apply the Saved Plan: The "tfplan" argument specifies the plan file created by the previous terraform plan -out=tfplan command. By providing this plan file, you instruct Terraform to apply the exact set of changes that were outlined in the plan. This ensures that the changes applied are consistent with what was reviewed during the planning stage, avoiding any surprises or unintended modifications.
-
-
-## Demo
-
-
