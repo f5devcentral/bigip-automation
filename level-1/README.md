@@ -1,4 +1,4 @@
-# Automating BIGIP configuration with Terraform and Per-App AS3
+# Building an Automation Framework with Terraform and Per-App AS3
 
 In this use-case, we'll explore how to automate the configuration of F5 application services using F5's Per Application AS3 and Terraform and templates. We have created 2 Terraform modules, each corresponding to a specific AS3 configuration (http and https). When these modules are invoked from the main module, they automate the creation of application configurations on the F5 device. This approach simplifies the deployment process and makes it easier to manage and scale applications.
 
@@ -201,7 +201,113 @@ provider "bigip" {
 
 The `providers.tf` file defines the F5 BIG-IP providers, allowing you to manage multiple F5 devices using provider aliases. This enables you to deploy configurations to different devices by specifying the appropriate provider alias.
 
-## Demo
+
+
+## Demo on UDF
+
+### Prerequisites
+- Deploy the **Oltra** UDF Deployment
+- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.
+
+### Step 1. Go to Terrafrom directory
+
+Go to VS Code command line and change the working directory to `tf-level-1`
+```
+cd tf-level-1
+```
+
+### Step 2. Review the provider details
+Open the file `provider.tf` and review the IP Address, Username and Password for the BIGIP device. 
+These should match `10.1.1.5`, `admin` and `Ingresslab123` 
+
+### Step 3. Terraform init
+Initialize Terraform on the working directory, to download the necessary provider plugins (BIGIP) and setup the modules/backend for storing your infrastructure's state
+
+```cmd
+terraform init
+```
+
+### Step 4. Terraform plan
+
+Run the **terraform plan** command to create a plan consisting of a set of changes that will make your resources match your configuration. 
+
+```cmd
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+
+> [!NOTE]
+> Review the actions Terraform would take to modify your infrastructure before moving to the next step.
+
+> [!TIP]
+> By using the `out` flag with terraform plan, the plan was saved into a file called `tfpan` that will be used by **terraform apply** command.
+
+
+### Step 5. Terraform apply
+
+Run the **terraform apply** command to deploy the changes identified from the `plan` stage.
+
+```cmd
+terraform apply -parallelism=1 tfplan
+```
+
+Review the output from the `apply` command.
+
+
+### Step 6. (Optional) Change the configuration
+
+Edit the `app1.tf` file and change the IP Address configured for this service. 
+Re-run **terrafrom plan** command to create the plan and review the suggested changes.
+
+```cmd
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+
+The output of the above command should be similar to the following
+
+```tf
+Terraform will perform the following actions:
+
+  # module.app1.bigip_as3.as3 will be updated in-place
+  ~ resource "bigip_as3" "as3" {
+      ~ as3_json         = jsonencode(
+          ~ {
+              ~ path_app1     = {
+                  ~ app1      = {
+                      ~ virtualAddresses = [
+                          ~ "10.1.120.82" -> "10.1.120.50",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    }
+                    # (2 unchanged attributes hidden)
+                }
+                # (1 unchanged attribute hidden)
+            }
+        )
+        id               = "uat1"
+        # (7 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+```
+
+To deploy the suggested changes run the following command.
+
+```cmd
+terraform apply -parallelism=1 "tfplan"
+```
+
+
+### Step 7. Deleting the configuration
+Deleting of the apps deployed can take place with 2 methods. One method would be to delete the file and re-run `terraform plan` and `terraform apply` and demontrasted before.
+
+Alternatively you can run the destroy command to delete all configuration.
+
+```cmd
+terraform destroy -parallelism=1 -refresh=false
+```
+
+
+## Demo on your Local environment
 
 ### Prerequisites
 To run the following demo you need to have Terraform installed in your environment.
