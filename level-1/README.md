@@ -2,13 +2,14 @@
 
 In this use-case, we'll explore how to automate the configuration of F5 application services using F5's Per-App AS3 and Terraform. We have templetized the AS3 JSON files using Terraform's `templatefile` function and along with the `bigip_as3` resource, these templates are encapsulated within a custom module. This module can be invoked from the root directory (`root module`) by supplying necessary variables, such as IP Address, Pool Members, SSL certificates, etc. This streamlined approach enhances the deployment process, making it more manageable and scalable for applications configured through Terraform and AS3.
 
-![terraform-f5](../images/terraform-f5.png)
+![terraform-f5](../images/level-1.png)
 
 # Table of Contexts
 
 - [Code Explanation](#code-explanation)
   - [AS3_Modules](#as3_modules)
   - [Root Module](#root-module)
+- [Use case workflow](#use-case-workflow)
 - [Demo with UDF](#demo-with-udf)
 - [Demo on your local environment](#demo-on-your-local-environment)
 
@@ -136,7 +137,7 @@ output "as3" {
 }
 ```
 
-### *Main Module*
+### *Root Module*
 The main module orchestrates the deployment of the VirtualServer configurations on the F5 device by invoking the respective modules. For each VirtualServer you want to create, you will need to create a separate `appX.tf` file (or append the relevant configuration on the existing file). Additionally, the main module includes the `providers.tf` file that defines multiple F5 BIG-IP providers, each corresponding to a single BIGIP device. 
 
 
@@ -189,6 +190,18 @@ provider "bigip" {
 ```
 
 
+## Use-case workflow
+The workflow for this use-case is as follows:
+- The Terraform code is stored on a specific directory on your local machine.
+- User creates a new Terraform file configuration (`appX.tf`) with the appropriate application variables.
+- User executes localy **terraform plan** and **terraform apply** commands. 
+
+Benefits: 
+  - All application varialbes are stored in a simple `tf` file. 
+  - User just add/modifies/removes these files to change the configuration on BIGIP
+  
+
+
 ## Demo with UDF
 
 ### Prerequisites
@@ -197,7 +210,7 @@ provider "bigip" {
 
 ### Step 1. Go to Terrafrom directory
 
-Open VS Code terminal and change the working directory to `tf-level-1`
+Open the `VS Code` terminal and change the working directory to `tf-level-1`
 ```
 cd tf-level-1
 ```
