@@ -4,34 +4,35 @@ Storing configuration as code in Git provides numerous benefits, making it an es
 
 In our `Level-2` automation use-case, integrating Git will allow us to have a reliable version control system and a comprehensive audit trail, enabling us to track every change made to our codebase, quickly revert to previous versions when needed, and maintain clear documentation of our project's evolution.
 
-![git-f5](../images/level-2.png)
+![level-2](../images/level-2.png)
 
 
 # Table of Contexts
 - [Use case workflow](#use-case-workflow)
 - [Demo with UDF](#demo-with-udf)
-- [Demo with GitLab](#demo-with-gitlab)
+- [Demo on your local environment](#demo-on-your-local-environment)
 
 
-## Use-case workflow
+## Use case workflow
 The workflow for this use-case is as follows:
-- The Terraform code is stored on a Git platform (GitLab on-prem or cloud).
-- User clones the repo to their local machine that have Terraform installed.
-- User creates or makes changes on the Terraform files and commits them back to Git with the appropriate commit message.
-- User executes localy **terraform plan** and **terraform apply** as described on `Level-1` use-case. 
-
+  - The Terraform code is stored on a Git platform (either GitLab on-premises or cloud).
+  - Users clone the repository to their local machines, which have Terraform installed.
+  - Users create or make changes to the Terraform files 
+  - Users can execute **terraform plan** and **terraform apply** locally as described in the Level-1 use case to preview and apply changes before committing them to Git.
+  - Users commit the changes back to the Git repository with appropriate commit messages.
 
 Benefits: 
-  - All benefits of `Level-1`
-  - Track all changes made to the code
-  - Easily revert back to previous versions
-  - Document changes
+  - All benefits of `Level-1` use case
+  - **Track Changes**: Track all changes made to the code, providing a clear history of modifications.
+  - **Version Control**: Easily revert back to previous versions of the code if necessary.
+  - **Documentation**: Document changes through commit messages, ensuring transparency and ease of understanding.
+
 
 > [!IMPORTANT]
 > This use-case doesn't support mutliple people/teams working on the same project as that would require to have the Terraform state in a shared locations with the ability to be locked while teams are implementing changes. This requirement is cover by our `Level-4` use-case.
 
 
-## Demo on UDF
+## Demo with UDF
 
 #### Prerequisites
 - Deploy the **Oltra** UDF Deployment
@@ -134,7 +135,7 @@ git push
 
 Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.*
 
-Log on to GitLab using the root credentials (root/Ingresslab123) and select the repository `bigip / tf_level_2`. 
+Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_2`. 
 
 <p align="center">
   <img src="../images/repo.png" style="width:75%">
@@ -159,4 +160,9 @@ Alternatively you can select the **History** button to see the evolution of the 
 </p>
 
 > [!TIP]
-> Navigate through the different **Buttons**/**Links** that on the previous pages so that you familiarize yourself with the different capabilties.
+> Navigate through the different links/buttons/pages to familiarize yourself with the different capabilties.
+
+
+## Demo on your local environment
+
+********  PENDING  **********

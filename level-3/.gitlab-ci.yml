@@ -1,0 +1,127 @@
+---
+# Pipeline will only trigger when something is pushed to main branch, merge request 
+# and does not contain the word `draft` on the commit message.
+
+workflow:  
+    rules:
+      - if: $CI_COMMIT_MESSAGE =~ /-draft$/
+        when: never     
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        when: always
+      - if: $CI_COMMIT_BRANCH == "main"
+        when: always
+      - when: never
+
+# List of variables
+variables:
+  TF_DIR: ${CI_PROJECT_DIR}       # Directory in which terraform files are kept
+  STATE_NAME: "tf_state_lvl_2"          # Name of terraform state used in "terraform init"command
+  ADDRESS: "https://git.f5k8s.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
+  TF_USERNAME: $tf_user
+
+# Stages of the pipeline
+stages:
+  - validation
+  - plan
+  - apply
+
+# Image which will use in each stage
+image:
+  name: skenderidis/ansible-runner:terraform
+  entrypoint: [""]
+
+verify:
+  stage: validation
+  script:
+    - echo "ok"
+  only:
+    - merge_requests
+    - main
+  
+
+# To check the TF plan for any changes on the BIGIP Virtual Servers
+plan:
+  stage: plan
+  script:
+    # Initialize variables and get terraform version for troubleshooting
+    - terraform --version
+    - export GITLAB_ACCESS_TOKEN=$tf_access_token
+    - echo $GITLAB_ACCESS_TOKEN
+    - cd ${TF_DIR}            # To get inside the working directory
+    # To initiate terraform backend / gitlab managed terraform state
+    - |
+      terraform init \
+      -backend-config=address=${ADDRESS} \
+      -backend-config=lock_address=${ADDRESS}/lock \
+      -backend-config=unlock_address=${ADDRESS}/lock \
+      -backend-config=username=${TF_USERNAME} \
+      -backend-config=password=${GITLAB_ACCESS_TOKEN} \
+      -backend-config=lock_method=POST \
+      -backend-config=unlock_method=DELETE \
+      -backend-config=retry_wait_min=5
+
+    - mkdir tf_details # create a folder to be saved as an artifact at the end of the stage
+    - terraform plan -parallelism=1 -refresh=false -out=tfplan
+
+    # save changes (add/update/delete) as artifact.
+    - terraform show -no-color -json tfplan | jq -r '.resource_changes[] | select(.change.actions[0]=="update")' > tf_details/update.json
+    - terraform show -no-color -json tfplan | jq -r '.resource_changes[] | select(.change.actions[0]=="create")' > tf_details/create.json
+    - terraform show -no-color -json tfplan | jq -r '.resource_changes[] | select(.change.actions[0]=="delete")' > tf_details/delete.json
+
+    #verify the files (artifacts) created
+    - ls -l tf_details
+
+    # create a folder to be saved as an artifact at the end of the stage
+    - mkdir as3
+    # Save the updated AS3 for applications that will be updated
+    - terraform show -no-color -json tfplan | jq -r '.resource_changes[] | select(.change.actions[0]=="update") | select(.change.after.as3_json and .module_address and .change.after.tenant_name) | "\(.module_address) \(.change.after.tenant_name) \(.change.after.as3_json)"' | while IFS=' ' read -r module_address tenant_name as3_json; do   module_address=$(echo "$module_address" | sed 's/^module.//'); file_name="as3/${tenant_name}_${module_address}-(updated).json";  echo "$as3_json" | jq . > "$file_name"; done
+
+    # Save the new AS3 for applications that will be created
+    - terraform show -no-color -json tfplan | jq -r '.resource_changes[] | select(.change.actions[0]=="create") | select(.change.after.as3_json and .module_address and .change.after.tenant_name) | "\(.module_address) \(.change.after.tenant_name) \(.change.after.as3_json)"' | while IFS=' ' read -r module_address tenant_name as3_json; do   module_address=$(echo "$module_address" | sed 's/^module.//'); file_name="as3/${tenant_name}_${module_address}-(created).json";  echo "$as3_json" | jq . > "$file_name"; done
+
+    # Save the AS3 for applications that will be deleted
+    - terraform show -no-color -json tfplan | jq -r '.resource_changes[] | select(.change.actions[0]=="delete") | select(.change.before.as3_json and .module_address and .change.before.tenant_name) | "\(.module_address) \(.change.before.tenant_name) \(.change.before.as3_json)"' | while IFS=' ' read -r module_address tenant_name as3_json; do   module_address=$(echo "$module_address" | sed 's/^module.//'); file_name="as3/${tenant_name}_${module_address}-(deleted).json";  echo "$as3_json" | jq . > "$file_name"; done
+
+    #verify the files (artifacts) created
+    - ls -l as3
+
+  artifacts:
+    paths:
+      - tfplan
+      - tf_details
+      - as3
+  only:
+    - merge_requests
+    - main
+
+
+# To apply the TF plan for any changes on the BIGIP Virtual Servers
+apply:
+  stage: apply
+  script:
+    # Initialize variables and get terraform version for troubleshooting
+    - terraform --version
+    - export GITLAB_ACCESS_TOKEN=$tf_access_token
+    - echo $GITLAB_ACCESS_TOKEN
+    - cd ${TF_DIR}            # To get inside the working directory
+    # To initiate terraform backend / gitlab managed terraform state
+    - |
+      terraform init \
+      -backend-config=address=${ADDRESS} \
+      -backend-config=lock_address=${ADDRESS}/lock \
+      -backend-config=unlock_address=${ADDRESS}/lock \
+      -backend-config=username=${TF_USERNAME} \
+      -backend-config=password=${GITLAB_ACCESS_TOKEN} \
+      -backend-config=lock_method=POST \
+      -backend-config=unlock_method=DELETE \
+      -backend-config=retry_wait_min=5    
+
+    # Apply the changes
+    - terraform apply -parallelism=1 "tfplan"
+
+  dependencies:              
+    - plan
+
+  only:
+    - main
+
