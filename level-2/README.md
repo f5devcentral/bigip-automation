@@ -4,7 +4,7 @@ Storing configuration as code in Git provides numerous benefits, making it an es
 
 In our `Level-2` automation use-case, integrating Git will allow us to have a reliable version control system and a comprehensive audit trail, enabling us to track every change made to our codebase, quickly revert to previous versions when needed, and maintain clear documentation of our project's evolution.
 
-![level-2](../images/level-2.png)
+![level-2](../images/level-2.gif)
 
 
 # Table of Contexts
