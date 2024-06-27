@@ -1,42 +1,66 @@
-# Level-4  Including branches and Merge Requests on the Automation Framework
+# Including branches and Merge Requests
 
-In all previous scenarios (levels) there was priomarily a single user that was using the automation framework to deploy services on BIGIP platforms. In `Level-4` we are going to show how can a team of BIGIP Admins/Users can create an automation platform that they can collaborate effectively. To achieve that we are introducing **Branches** and **Merge Requests** to the automation framework. 
- - **Git Branches**. 
- - **Merge Requests**. 
+In all previous scenarios (levels) there was primarily a single user that was using the automation framework to deploy services on BIGIP platforms. In `Level-4` we are going to show how can a team of BIGIP Admins/Users can create a platform that they can collaborate effectively and automate the deployment of services. To achieve that we are introducing **Branches** and **Merge Requests** to the automation framework. 
+  1. **Git Branches**. 
+      - Branches allow multiple users to work on different task or changes simultaneously without interfering with the main code.
+      - Each team member can create a separate branch from the main branch for their specific tasks, ensuring that changes do not affect the production environment.
+      - For example, a user might create a branch named `app50.tf` to work on a new load balancing configuration.
+  2. **Merge Requests**. 
+      - Merge Requests (MRs) facilitate code review and integration, ensuring that changes are systematically reviewed and tested before being merged into the main branch.
+      - Once a user completes their changes in a branch, they open a Merge Request to merge their branch into the main branch. Other team members can review the MR, provide feedback, and approve the changes.
+      - The CI/CD pipeline can run automatically when a Merge Request is created, ensuring that all tests pass and the changes do not introduce any errors before merging.
 
-
-![git-f5](images/git-f5.png)
+![level-4](../images/level-4.png)
 
 
 # Table of Contexts
 
-- [Use-case details](#code-explanation)
-- [Demo](#Demo)
+- [Use case workflow](#use-case-workflow)
+- [Code Explanation](#code-explanation)
+  - [Pipeline](#pipeline)
+- [Demo with UDF](#demo-with-udf)
 
 
-## Use-case details
+## Use case workflow
 The workflow for this use-case is as follows:
-- The Terraform code is stored on a Git platform (GitLab on-prem or cloud).
-- User clones the repo to their local machine that have Terraform installed.
-- User will make changes on the Terraform files 
-- User doesn't have access to the `main` branch so they will commit their changes to another branch in Git.
-- User will create a merge request from the `working branch` to `main`.
-- Git will trigger a pipeline that will run `terraform plan` that will allow the Admin to easily review the planned changes.
-- User with Admin rights on the repository will `Approve` the `merge request` so that the changes are pushed into the main branch
-- Git will trigger the pipeline that will run the Terraform commands and deploy the changes
- 
+  1. The Terraform code is stored on a Git platform (GitLab on-prem or cloud).
+  1. Users clone the repository to their local machines. (Terraform is NOT required) 
+  1. Users doesn't have access to the `main` branch so they create a new branch from the main branch for their task.
+  1. Users make changes in the branch and commits them.
+  1. Upon completion, the team member opens a `Merge Request` to merge their branch into the `main` branch.
+  1. The CI/CD pipeline automatically runs tests and validations on the Merge Request.
+  1. Other team members (*Admins*) review the Merge Request, provide feedback, and approve the changes.
+  1. Once approved, the changes are merged into the main branch, and the pipeline deploys the updates.
 
-Benefits: 
+**Benefits:**
+  - **Collaboration**: Branches and Merge Requests enable multiple users to work collaboratively on different parts of the project without conflicts.
+  - **Code Quality**: Merge Requests facilitate peer reviews, improving code quality through feedback and collaboration.
+  - **Automated Testing**: The CI/CD pipeline automatically tests changes in Merge Requests, reducing the likelihood of errors in the main branch.
+  - **Controlled Deployment**: Changes are only merged into the main branch after passing reviews and tests, ensuring a stable and reliable codebase.
+
   - Users can make changes without impacting the main branch.
   - Multiple team members can work together without their changes conflicting with each other.
   - Code Review takes place during the merge review, where the Admin user can review not only the code changes but also the `terraform plan` changes.
 
 
-## Demo on UDF
+## Code Explanation
+In the following section, we  provide a deeper explanation of the **pipeline** configuration.
+
+
+### *Pipeline*
+
+The only difference between this pipeline and the one in `Level-3` is that this pipeline run 1 of the 3 stages during the Merge Request (MR). This stage is `plan`, so that the reviewer can easier see what will the changes be before accepting the MR. 
+
+So you find at the 
+
+You can find the entire pipeline <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/.gitlab-ci.yml"> here </a>
+
+
+## Demo with UDF
 
 #### Prerequisites
-- Deploy the **Oltra** Deployment on UDf
-- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.
+- Deploy the **Oltra** UDF Deployment
+- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.*
 
 ### Step 1. Clone Terraform repository
 
@@ -46,36 +70,34 @@ Go to VS Code command line and clone `tf-level-4` from the internally hosted Git
 git clone https://udf:Ingresslab123@git.f5k8s.net/bigip/tf-level-4.git
 ```
 > [!NOTE]
-> This time we are cloning the repo with a different user credentials
+> This time we are cloning the repo with a different user credentials, so that this user doesn't have access to `main` branch
 
 ### Step 2. Go to Terrafrom directory and create a branch
 
-Change the working directory to `tf-level-2`. As the user `UDF` doesnt have privilleges to write to the main branch, the work done will have to be committed to a `branch`. The following command will create a new branch called `demo` if it doesn't already exists.
+Change the working directory to `tf-level-2`. As the user `UDF` doesnt have privilleges to write to the main branch, the work done will have to be committed to a `branch`. The following command will create a new branch called `app50` if it doesn't already exists.
 
 ```cmd
 cd tf-level-4
-git fetch origin && (git checkout demo || git checkout -b demo)
-
+git fetch origin && (git checkout app50 || git checkout -b app50)
 ```
 
 ### Step 3. Create a new configuration
 Create the configuration to publish a new application and save the file as `app4.tf`.
 
 ```cmd
-cat <<EOF > app4.tf
-module "app4" {
+cat <<EOF > app50.tf
+module "app50" {
     source              = "./modules/as3_http"
-    name                = "app4"
-    virtualIP           = "10.1.10.41"
-    serverAddresses     = ["10.1.20.10", "10.1.20.11"]
-    servicePort         = 80
-    partition           = "uat1"
+    name                = "app50"
+    virtualIP           = "10.1.10.45"
+    serverAddresses     = ["10.1.20.21"]
+    servicePort         = 30880
+    partition           = "prod"
     providers = {
       bigip = bigip.dmz
     }    
 }
 EOF
-
 ```
 
 ### Step 4. Commit Changes to Git repository
@@ -83,21 +105,76 @@ EOF
 Add you details on Git so that any changes you make will include your name. This will make it easier in the future to identify who made the change.
 
 ```cmd
-git config user.name "FirstName LastName"
-git config user.email "abc@example.com"
+git config user.name "John Doe"
+git config user.email "j.doe@f5.com"
 ```
 
 Run the following commands that will push the changes made on the configuration files back to the origin Git repository
 
 ```cmd
 git add .
-git commit -m "Adding application app2"
-git push origin demo
+git commit -m "Adding application app50"
+git push origin app50
 ```
 
+### Step 5. Create Merge Request
 
-### Step 5. Login to Git to review the Merge Request.
+Run the following commands that will create a merge request in order for the changed to be merged into the main branch .
 
-Open the Gitlab webp  **VS Code** is under the `bigip-01` on the `Access` drop-down menu.
+```cmd
+git push -u origin HEAD \
+  -o merge_request.create \
+  -o merge_request.title="New Merge Request $(git branch --show-current)" \
+  -o merge_request.description="This MR was create to deploy app50" \
+  -o merge_request.target=main \
+  -o merge_request.remove_source_branch \
+  -o merge_request.squash
+```
 
+### Step 6. Login to Git to review the Merge Request.
+
+Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.*
+
+Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_4`. 
+
+<p align="center">
+  <img src="../images/pipelines_lvl4.png" style="width:75%">
+</p>
+
+Select the merge requests to review the suggested changes.
+
+<p align="center">
+  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
+</p>
+
+Check the status of the pipeline that has been executed during the merge request.
+
+<p align="center">
+  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
+</p>
+
+Go back to the merge request and approve the merge request.
+
+<p align="center">
+  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
+</p>
+
+### Step 7. Review the pipeline output.
+Go to `Pipelines` and review the execution of the pipeline that run on `main` branch. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
+
+<p align="center">
+  <img src="../images/pipelines_lvl4.png" style="width:75%">
+</p>
+
+Select the pipeline that refers to the commit that you just pushed.
+
+<p align="center">
+  <img src="../images/pipeline-details_lvl4.png" style="width:75%">
+</p>
+
+Click on each stage to see the logs but also the artifacts that the pipeline is creating.
+
+
+> [!NOTE]
+> Notice that the pipeline that runs on Merge Request is different than the pipeline that runs on the `main` branch.
 

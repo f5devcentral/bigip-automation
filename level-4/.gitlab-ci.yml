@@ -35,6 +35,7 @@ verify:
   script:
     - echo "ok"
   only:
+    - merge_requests
     - main
   
 
@@ -89,6 +90,7 @@ plan:
       - tf_details
       - as3
   only:
+    - merge_requests
     - main
 
 

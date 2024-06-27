@@ -4,12 +4,12 @@ In our `Level-2` use case, we moved our Terraform code to Git, enabling us to le
 
 In `Level-3` we are introducing 2 new elements to enhance the automation framework. 
   1. **Remote Terraform state**. 
-    - By default, Terraform stores its state locally in a file named terraform.tfstate. When working in a team, using a local file complicates Terraform usage because each user must ensure they have the latest state data before running Terraform, and must avoid simultaneous runs by others.
-    - With remote state, Terraform writes the state data to a remote data store, which can then be shared among all team members. This ensures consistency and prevents conflicts.
-    - Terraform supports various remote state backends, including HCP Terraform, HashiCorp Consul, GitLab, Amazon S3, Azure Blob Storage, Google Cloud Storage, Alibaba Cloud OSS, and more. For our use case, we will use GitLab as the remote data store for the terraform.tfstate file.
+      - By default, Terraform stores its state locally in a file named terraform.tfstate. When working in a team, using a local file complicates Terraform usage because each user must ensure they have the latest state data before running Terraform, and must avoid simultaneous runs by others.
+      - With remote state, Terraform writes the state data to a remote data store, which can then be shared among all team members. This ensures consistency and prevents conflicts.
+      - Terraform supports various remote state backends, including HCP Terraform, HashiCorp Consul, GitLab, Amazon S3, Azure Blob Storage, Google Cloud Storage, Alibaba Cloud OSS, and more. For our use case, we will use GitLab as the remote data store for the terraform.tfstate file.
   2. **Pipelines**. 
-    - Instead of executing Terraform commands on each user's machine, we will implement a CI/CD pipeline within the GitLab repository. This pipeline will trigger automatically with every commit to the repository, centralizing and streamlining the deployment process.
-    - The pipeline will execute the necessary Terraform commands, along with any additional scripts or commands required for the deployment. This approach ensures consistency, reduces human error, and enhances the overall automation of our infrastructure management.
+      - Instead of executing Terraform commands on each user's machine, we will implement a CI/CD pipeline within the GitLab repository. This pipeline will trigger automatically with every commit to the repository, centralizing and streamlining the deployment process.
+      - The pipeline will execute the necessary Terraform commands, along with any additional scripts or commands required for the deployment. This approach ensures consistency, reduces human error, and enhances the overall automation of our infrastructure management.
 
 
 ![level-3](../images/level-3.png)
@@ -27,12 +27,12 @@ In `Level-3` we are introducing 2 new elements to enhance the automation framewo
 
 ## Use case workflow
 The workflow for this use case is as follows:
-  - The Terraform code is stored on a Git platform (GitLab on-prem or cloud).
-  - Users clone the repository to their local machines. (Terraform is NOT required) 
-  - Users create or make changes to the Terraform files and commit these changes back to the Git repository with appropriate commit messages.
-  - GitLab triggers a pipeline that runs the Terraform commands automatically.
+  1. The Terraform code is stored on a Git platform (GitLab on-prem or cloud).
+  1. Users clone the repository to their local machines. (Terraform is NOT required) 
+  1. Users create or make changes to the Terraform files and commit these changes back to the Git repository with appropriate commit messages.
+  1. GitLab triggers a pipeline that runs the Terraform commands automatically.
 
-Benefits:
+**Benefits:**
   - All benefits of `Level-2` use case
   - **Centralized Execution**: Terraform commands run from a centralized location, eliminating the need for local installations on each user's machine.
   - **Log and Output History**: A comprehensive history of all Terraform logs and outputs is maintained alongside the Git commits, providing an audit trail and facilitating troubleshooting.
@@ -142,7 +142,6 @@ verify:
   script:
     - echo "ok"
   only:
-    - merge_requests
     - main
 ```
 
@@ -305,7 +304,6 @@ git commit -m "Adding application app03"
 git push
 ```
 
-
 ### Step 5. Login to Git to review the pipeline output.
 
 Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.*
@@ -313,26 +311,26 @@ Access the web interface **GitLab** that is under the `bigip-01` on the `Access`
 Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_3`. 
 
 <p align="center">
-  <img src="../images/repo.png" style="width:75%">
+  <img src="../images/repo_lvl3.png" style="width:75%">
 </p>
 
 
 Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
 
 <p align="center">
-  <img src="../images/pipelines.png" style="width:75%">
+  <img src="../images/pipelines_lvl3.png" style="width:75%">
 </p>
 
 Select the pipeline that refers to the commit that you just pushed.
 
 <p align="center">
-  <img src="../images/pipeline-details.png" style="width:75%">
+  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
 </p>
 
 Click on each stage to see the logs but also the artifacts that the pipeline is creating.
 
 <p align="center">
-  <img src="../images/plan-stage.png" style="width:75%">
+  <img src="../images/plan-stage_lvl3.png" style="width:75%">
 </p>
 
 
