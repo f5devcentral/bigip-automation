@@ -1,5 +1,4 @@
 # Including branches and Merge Requests
-
 In all previous scenarios (levels) there was primarily a single user that was using the automation framework to deploy services on BIGIP platforms. In `Level-4` we are going to show how can a team of BIGIP Admins/Users can create a platform that they can collaborate effectively and automate the deployment of services. To achieve that we are introducing **Branches** and **Merge Requests** to the automation framework. 
   1. **Git Branches**. 
       - Branches allow multiple users to work on different task or changes simultaneously without interfering with the main code.
@@ -38,10 +37,6 @@ The workflow for this use-case is as follows:
   - **Automated Testing**: The CI/CD pipeline automatically tests changes in Merge Requests, reducing the likelihood of errors in the main branch.
   - **Controlled Deployment**: Changes are only merged into the main branch after passing reviews and tests, ensuring a stable and reliable codebase.
 
-  - Users can make changes without impacting the main branch.
-  - Multiple team members can work together without their changes conflicting with each other.
-  - Code Review takes place during the merge review, where the Admin user can review not only the code changes but also the `terraform plan` changes.
-
 
 ## Code Explanation
 In the following section, we  provide a deeper explanation of the **pipeline** configuration.
@@ -50,8 +45,6 @@ In the following section, we  provide a deeper explanation of the **pipeline** c
 ### *Pipeline*
 
 The only difference between this pipeline and the one in `Level-3` is that this pipeline run 1 of the 3 stages during the Merge Request (MR). This stage is `plan`, so that the reviewer can easier see what will the changes be before accepting the MR. 
-
-So you find at the 
 
 You can find the entire pipeline <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/.gitlab-ci.yml"> here </a>
 
@@ -69,8 +62,9 @@ Go to VS Code command line and clone `tf-level-4` from the internally hosted Git
 ```cmd
 git clone https://udf:Ingresslab123@git.f5k8s.net/bigip/tf-level-4.git
 ```
+
 > [!NOTE]
-> This time we are cloning the repo with a different user credentials, so that this user doesn't have access to `main` branch
+> This time we are cloning the repo with a different user credentials, so that this user doesn't have access to the `main` branch
 
 ### Step 2. Go to Terrafrom directory and create a branch
 
