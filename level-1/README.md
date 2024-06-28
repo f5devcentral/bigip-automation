@@ -1,6 +1,6 @@
 # Building an Automation Framework with Terraform and Per-App AS3
 
-In this use-case, we'll explore how to automate the configuration of F5 application services using F5's Per-App AS3 and Terraform. We have templetized the AS3 JSON files using Terraform's `templatefile` function and along with the `bigip_as3` resource, these templates are encapsulated within a custom module. This module can be invoked from the root directory (`root module`) by supplying necessary variables, such as IP Address, Pool Members, SSL certificates, etc. This streamlined approach enhances the deployment process, making it more manageable and scalable for applications configured through Terraform and AS3.
+In this use-case, we'll explore how to automate the configuration of F5 application services using F5's **Per-App AS3** and **Terraform**. We have templetized the AS3 JSON files using Terraform's `templatefile` function and along with the TF `bigip_as3` resource, these templates are encapsulated within a custom module. This module can be invoked from the root directory (`root module`) by supplying necessary variables, such as IP Address, Pool Members, SSL certificates, etc. This streamlined approach enhances the deployment process, making it more manageable and scalable for applications configured through Terraform and AS3.
 
 ![level-1](../images/level-1.png)
 
@@ -222,14 +222,34 @@ Open and review the following files to get a better understanding on how the con
  - **main.tf** under `modules`->`as3_http` 
  - **variables.tf** under `modules`->`as3_http` 
 
-### Step 3. Terraform init
+
+### Step 3. Create a new configuration
+Create the configuration to publish the new application and save it as a file called `app1.tf`.
+
+```cmd
+cat <<EOF > app1.tf
+module "app1" {
+    source              = "./modules/as3_http"
+    name                = "app1"
+    virtualIP           = "10.1.10.41"
+    serverAddresses     = ["10.1.20.21"]
+    servicePort         = 30880
+    partition           = "prod"
+    providers = {
+      bigip = bigip.dmz
+    }    
+}
+EOF
+```
+
+### Step 4. Terraform init
 Initialize Terraform on the working directory, to download the necessary provider plugins (BIGIP) and setup the modules and backend for storing your infrastructure's state
 
 ```cmd
 terraform init
 ```
 
-### Step 4. Terraform plan
+### Step 5. Terraform plan
 
 Run the **terraform plan** command to create a plan consisting of a set of changes that will make your resources match your configuration. 
 
@@ -241,7 +261,7 @@ terraform plan -parallelism=1 -refresh=false -out=tfplan
 > Review the actions Terraform would take to modify your infrastructure before moving to the next step.
 
 
-### Step 5. Terraform apply
+### Step 6. Terraform apply
 
 Run the **terraform apply** command to deploy the changes identified from the `plan` stage.
 
@@ -249,7 +269,7 @@ Run the **terraform apply** command to deploy the changes identified from the `p
 terraform apply -parallelism=1 tfplan
 ```
 
-### Step 6. Change the configuration
+### Step 7. Change the configuration
 
 Edit the `app1.tf` file and change the IP Address configured for this service (10.1.120.40 -> 10.1.120.41)
 Re-run **terrafrom plan** command to create the plan and review the suggested changes.
@@ -293,7 +313,7 @@ terraform apply -parallelism=1 "tfplan"
 ```
 
 
-### Step 7. Deleting the configuration
+### Step 8. Deleting the configuration
 Deleting of the apps deployed can take place with 2 methods. One method would be to delete the file `app1.tf` and re-run `terraform plan` `terraform apply` commands as demontrasted before or alternatively you can run the `terraform destroy` command to delete all TF configuration.
 In our case, we will delete the `app1.tf` file.
 

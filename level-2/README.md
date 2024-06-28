@@ -4,13 +4,13 @@ Storing configuration as code in Git provides numerous benefits, making it an es
 
 In our `Level-2` automation use-case, integrating Git will allow us to have a reliable version control system and a comprehensive audit trail, enabling us to track every change made to our codebase, quickly revert to previous versions when needed, and maintain clear documentation of our project's evolution.
 
-![level-2](../images/level-2.gif)
+![level-2](../images/level-2.png)
 
 
 # Table of Contexts
 - [Use case workflow](#use-case-workflow)
 - [Demo with UDF](#demo-with-udf)
-- [Demo on your local environment](#demo-on-your-local-environment)
+- [Demo with GitLab.com](#demo-with-gitlabcom)
 
 
 ## Use case workflow
@@ -163,6 +163,6 @@ Alternatively you can select the **History** button to see the evolution of the 
 > Navigate through the different links/buttons/pages to familiarize yourself with the different capabilties.
 
 
-## Demo on your local environment
+## Demo with GitLab.com
 
 ********  PENDING  **********
