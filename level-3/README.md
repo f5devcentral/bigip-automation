@@ -55,7 +55,8 @@ By using GitLab, you can:
 - Remotely execute terraform plan and terraform apply commands.
 
 
-**Configuring Remote State for HTTP Backend in GitLab**
+**Configuring Remote State for HTTP Backend in GitLab**.
+
 Below you can find the configuration we are using on our pipeline in order to have access to the remote state.
 
 ```tf
@@ -76,9 +77,9 @@ terraform init \
 ```
 
 ### *Pipeline*
-In this section we provide an overview of the pipeline configuration and how it works. We will be breaking up the pipeline, but you can find the entire pipeline <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/.gitlab-ci.yml"> here </a>
+In this section we provide an overview of the pipeline configuration and how it works. We will be breaking up the pipeline, but you can find the entire pipeline <a href="https://github.com/f5devcentral/bigip-automation/blob/main/level-3/.gitlab-ci.yml"> here </a>
 
-**Workflow**
+#### Workflow
 The pipeline is triggered based on specific conditions:
 
 - It will not trigger if the commit message ends with `-draft`.
@@ -96,7 +97,7 @@ workflow:
         when: always
       - when: never
 ```
-**Variables**
+#### Variables
 The pipeline defines several variables:
 
 **TF_DIR**: Directory containing Terraform files.
@@ -111,7 +112,7 @@ variables:
   ADDRESS: "https://git.f5k8s.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
   TF_USERNAME: $tf_user
 ```
-**Stages & Image**
+#### Stages & Image
 The pipeline consists of three stages but you can change them according to your requirements:
 
 - Validation
@@ -134,7 +135,7 @@ image:
 ```
 
 
-**Validation Stage**
+#### Validation Stage
 Typically the validation stage is customer specific in order to verify the configuration based on their requirements, so in this demo we have left it without any configuration.
 ```yml
 verify:
@@ -145,7 +146,7 @@ verify:
     - main
 ```
 
-**Plan Stage**
+#### Plan Stage
 
 This stage involves:
 
@@ -213,7 +214,7 @@ plan:
 
 ```
 
-**Apply Stage**
+#### Apply Stage
 This stage applies the changes based on the Terraform plan generated in the previous stage and will only run during `main` branch commits 
 
 
@@ -252,7 +253,7 @@ apply:
 ## Demo with UDF
 
 - Deploy the **Oltra** UDF Deployment
-- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.*
+- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
 
 
 ### Step 1. Clone Terraform repository
@@ -306,38 +307,28 @@ git push
 
 ### Step 5. Login to Git to review the pipeline output.
 
-Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.*
+Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.
 
 Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_3`. 
 
 <p align="center">
-  <img src="../images/repo_lvl3.png" style="width:75%">
+  <img src="../images/repo_lvl3.gif" style="width:80%">
 </p>
 
 
 Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
 
 <p align="center">
-  <img src="../images/pipelines_lvl3.png" style="width:75%">
-</p>
-
-Select the pipeline that refers to the commit that you just pushed.
-
-<p align="center">
-  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
-</p>
-
-Click on each stage to see the logs but also the artifacts that the pipeline is creating.
-
-<p align="center">
-  <img src="../images/plan-stage_lvl3.png" style="width:75%">
+  <img src="../images/pipelines_lvl3.png" style="width:80%">
 </p>
 
 
 > [!TIP]
-> Navigate through the different links/buttons/pages to familiarize yourself with the different capabilties.
+> Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
 
-
+<p align="center">
+  <img src="../images/pipelines_lvl3.gif" style="width:80%">
+</p>
 
 ## Demo on your local environment
 
