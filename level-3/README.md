@@ -312,22 +312,21 @@ Access the web interface **GitLab** that is under the `bigip-01` on the `Access`
 Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_3`. 
 
 <p align="center">
-  <img src="../images/repo_lvl3.gif" style="width:80%">
+  <img src="../images/repo-lvl3.gif" style="width:80%">
 </p>
 
 
 Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
 
 <p align="center">
-  <img src="../images/pipelines_lvl3.png" style="width:80%">
+  <img src="../images/pipelines-lvl3.png" style="width:60%">
 </p>
 
 
-> [!TIP]
-> Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
+Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
 
 <p align="center">
-  <img src="../images/pipelines_lvl3.gif" style="width:80%">
+  <img src="../images/pipelines-lvl3.gif" style="width:80%">
 </p>
 
 ## Demo on your local environment
