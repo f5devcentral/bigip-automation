@@ -68,7 +68,7 @@ git clone https://udf:Ingresslab123@git.f5k8s.net/bigip/tf-level-4.git
 
 ### Step 2. Go to Terrafrom directory and create a branch
 
-Change the working directory to `tf-level-2`. As the user `UDF` doesnt have privilleges to write to the main branch, the work done will have to be committed to a `branch`. The following command will create a new branch called `app50` if it doesn't already exists.
+Change the working directory to `tf-level-4`. As the user `UDF` doesn't have privilleges to write to the main branch, the work done will have to be committed to a `branch`. The following command will create a new branch called `app50` if it doesn't already exists and switch to the new branch.
 
 ```cmd
 cd tf-level-4
@@ -76,7 +76,7 @@ git fetch origin && (git checkout app50 || git checkout -b app50)
 ```
 
 ### Step 3. Create a new configuration
-Create the configuration to publish a new application and save the file as `app4.tf`.
+Create the configuration to publish a new application and save the file as `app50.tf`.
 
 ```cmd
 cat <<EOF > app50.tf
@@ -94,7 +94,7 @@ module "app50" {
 EOF
 ```
 
-### Step 4. Commit Changes to Git repository
+### Step 4. Commit Changes to Git and create Merge Request
 
 Add you details on Git so that any changes you make will include your name. This will make it easier in the future to identify who made the change.
 
@@ -103,19 +103,11 @@ git config user.name "John Doe"
 git config user.email "j.doe@f5.com"
 ```
 
-Run the following commands that will push the changes made on the configuration files back to the origin Git repository
+Run the following commands that will push the changes made on the configuration files back to the origin Git repository and create a merge request.
 
 ```cmd
 git add .
 git commit -m "Adding application app50"
-git push origin app50
-```
-
-### Step 5. Create Merge Request
-
-Run the following commands that will create a merge request in order for the changed to be merged into the main branch .
-
-```cmd
 git push -u origin HEAD \
   -o merge_request.create \
   -o merge_request.title="New Merge Request $(git branch --show-current)" \
@@ -125,24 +117,24 @@ git push -u origin HEAD \
   -o merge_request.squash
 ```
 
-### Step 6. Login to Git to review the Merge Request.
 
-Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.*
+### Step 5. Login to Git to review the Merge Request.
+
+Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.
 
 Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_4`. 
 
 <p align="center">
-  <img src="../images/pipelines_lvl4.png" style="width:75%">
+  <img src="../images/repo-lvl4.png" style="width:75%">
 </p>
 
-Select the merge requests to review the suggested changes.
+Go to the Merge Requests page to review the suggested changes. Once you review the changes and the pipeline results, approve the MR and click `merge`
 
 <p align="center">
-  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
+  <img src="../images/merge-lvl4.gif" style="width:75%">
 </p>
 
-Check the status of the pipeline that has been executed during the merge request.
-
+Check that the changes **`app50.tf`** are now pushed to the main repository and branch **app50** has been removed.  
 <p align="center">
   <img src="../images/pipeline-details_lvl3.png" style="width:75%">
 </p>
