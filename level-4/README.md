@@ -117,7 +117,6 @@ git push -u origin HEAD \
   -o merge_request.squash
 ```
 
-
 ### Step 5. Login to Git to review the Merge Request.
 
 Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.
@@ -136,26 +135,17 @@ Go to the Merge Requests page to review the suggested changes. Once you review t
 
 Check that the changes **`app50.tf`** are now pushed to the main repository and branch **app50** has been removed.  
 <p align="center">
-  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
+  <img src="../images/repo-lvl4-1.png" style="width:75%">
 </p>
 
-Go back to the merge request and approve the merge request.
+
+### Step 6. Review the pipeline output.
+Go to `Pipelines` and review the execution of the pipeline that run on `main` branch. You should be able to see all the executed pipelines along with commit message as the title for each pipeline. 
+
+Select the pipeline that with the title **Merge branch 'app50' into main**.
 
 <p align="center">
-  <img src="../images/pipeline-details_lvl3.png" style="width:75%">
-</p>
-
-### Step 7. Review the pipeline output.
-Go to `Pipelines` and review the execution of the pipeline that run on `main` branch. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
-
-<p align="center">
-  <img src="../images/pipelines_lvl4.png" style="width:75%">
-</p>
-
-Select the pipeline that refers to the commit that you just pushed.
-
-<p align="center">
-  <img src="../images/pipeline-details_lvl4.png" style="width:75%">
+  <img src="../images/pipelines-lvl4.gif" style="width:75%">
 </p>
 
 Click on each stage to see the logs but also the artifacts that the pipeline is creating.
