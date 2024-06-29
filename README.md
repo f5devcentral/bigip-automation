@@ -1,10 +1,12 @@
-# Automating BIGIP with Per-App AS3 and Terraform
+# Creating an automation framework with Per-App AS3
 
 In the modern era of IT, automation and infrastructure as code (IaC) have become very important in streamlining operations and enhancing the agility of organizations. Terraform, an open-source IaC tool, allows administrators to define and provision infrastructure using a high-level configuration language. When combined with F5 Per App AS3, a declarative configuration API for BIG-IP, the result is a powerful solution for managing application services more efficiently and consistently.
 
 For F5 administrators, leveraging Terraform with AS3 can drastically reduce the time and effort required to deploy and manage application services. Automation not only minimizes human errors but also ensures that configurations are consistent across different environments. This enables organizations to respond quickly to changing business needs, scale their operations seamlessly, and maintain a high level of operational efficiency.
 
 In this repository, we will explore five use cases, each being the evolution of the previous, demonstrating how customers can build  their own automation framework. Each use case offers a different level of automation and also provides additional benefits, such as audit trail, code reviews, and many more. This way, customers can choose what best fits their knowledge and experience with these tools. Whether you are new to automation or already skilled in IaC practices, these examples will help you make your F5 application deployment processes easier and more efficient.
+
+![level-5](images/level-5.png)
 
 Building an Automation Framework (Stages/Levels)
 
@@ -19,10 +21,12 @@ Building an Automation Framework (Stages/Levels)
 
 - [Introduction](#automating-bigip-with-per-app-as3-and-terraform)
 - [Technologies used](#technologies-used)
-- [Deploying Services with Terraform](#deploying-services-with-terraform)
-  - [Adding new services](#adding-new-services)
-  - [Modifying services](#modifying-services)
-- [Best Practices](#best-practices-for-bigip-tmos)
+  - [Working with AS3 and Terraform](#working-with-as3-and-terraform)
+    - [Creating an AS3 resource](#creating-an-as3-resource)
+    - [Modifying an AS3 resource](#modifying-an-as3-resource)
+    - [Deleting an AS3 resource](#deleting-an-as3-resource)
+  - [Best Practices](#best-practices-for-bigip-tmos)
+- [Demo with UDF](#demo-with-udf)  
 
 
 ## Technologies used
@@ -42,14 +46,28 @@ ersion of YAML configurations into AS3 declarations using Jinja2 templates, and 
 By combining these components into a cohesive automation framework, organizations can achieve greater agility, scalability, and reliability in managing their F5 BIG-IP deployments. This approach empowers teams to focus on innovation and value delivery, while automation handles the repetitive and error-prone tasks associated with infrastructure configuration and deployment.
 
 
-## Deploying Services with Terraform
-When using Terraform, before applying any changes to your infrastructure, it is crucial to understand what modifications Terraform will make. By running and examining the output of **terraform plan**, you can verify that the planned changes match your intentions. This step is crucial for ensuring that your updates are applied correctly and that no unintended modifications occur. It provides a clear and detailed preview of the infrastructure changes, enhancing your control over the deployment process.
+### Working with AS3 and Terraform
+Before diving in into use cases for the automation framework, it is important to understand F5's terraform provider `bigip` that includes the resource `bigip_as3` (that support per-app AS3) works.  
 
-### Adding new services
-When you create a new configuration and execute **terraform plan**, you will see an output similar to the one below, indicating that the `bigip_as3` resource of the module `appX` and the will be created. In this example, the plan indicates that the `bigip_as3` resource will be created along with the details of the application, including the pool members, port number, and virtual address. The `+` symbol denotes attributes that will be created.
+```tf
+resource "bigip_as3" "as3-example" {
+  as3_json    = file("per-app.json")
+  tenant_name = "Test"
+}
+```
+Out of all the available arguments for the resource  `bigip_as3` we will be using only the following 2: 
+  - **as3_json** - (Required) Path/Filename of Declarative AS3 JSON which is a json file used with builtin file function
+  - **tenant_name** - (Optional) Name of Tenant. This name is used only in the case of Per-Application Deployment. If it is not provided, then a random name would be generated.
+
+Examples of **Per-App** JSON Declarations can be found on <a href="https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/userguide/per-app-declarations.html"> clouddocs </a>.
+
+When using Terraform, before applying any changes to your infrastructure, it is crucial to understand what modifications Terraform will make. By running and examining the output of **terraform plan**, you can verify that the planned changes match your intentions. In the following sections we will show the output when **creating**/**updating**/**deleting** `AS3 Per-App` resources with `Terraform`
+
+#### Creating an AS3 resource
+When you create a new configuration and execute **terraform plan**, you will see an output similar to the one below. The `+` symbol denotes attributes that will be created.
 
 ```cmd
-module.appX.bigip_as3.as3 will be created
+bigip_as3.as3 will be created
   + resource "bigip_as3" "as3" {
       + application_list = (known after apply)
       + as3_json         = jsonencode(
@@ -92,13 +110,12 @@ module.appX.bigip_as3.as3 will be created
 Plan: 1 to add, 0 to change, 0 to destroy.
 ```
 
-### Modifying services
+#### Modifying an AS3 resource
 When you make modifications to your Terraform configuration, such as changing an IP address, running **terraform plan** will show you the exact changes that will be applied. This helps you understand the impact of your changes before they are executed.
-
 For instance, if you update the virtual address for an application, the plan indicates that the `bigip_as3` resource will be updated in place. The as3_json section shows the change from the old IP address ***10.1.120.111*** to the new IP address ***10.1.120.112***. The `~` symbol denotes attributes that will be updated. Here's an example of the output you should see:
 
 ```tf
-module.app1.bigip_as3.as3 will be updated in-place
+bigip_as3.as3 will be updated in-place
   ~ resource "bigip_as3" "as3" {
       ~ as3_json         = jsonencode(
           ~ {
@@ -120,14 +137,13 @@ module.app1.bigip_as3.as3 will be updated in-place
 Plan: 0 to add, 1 to change, 0 to destroy.
 ```
 
-### Deleting services
+#### Deleting an AS3 resource
 When you remove configuration from the Terraform directory, running **terraform plan** will show you the exact resources/attributes that will be removed. The `-` symbol denotes attributes that will be deleted. Here's an example of the output you should see:
-
 
 ```tf
 Terraform will perform the following actions:
 
-  # module.app1.bigip_as3.as3 will be destroyed
+  # bigip_as3.as3 will be destroyed
   - resource "bigip_as3" "as3" {
       - application_list = "path_app1" -> null
       - as3_json         = jsonencode(
@@ -191,6 +207,146 @@ When running **`terraform apply`** it is suggested to use the following paramete
 - **`-parallelism=1`**
 
 - **`-out=tfplan`**
+
+```cmd
+terraform apply -parallelism=1 "tfplan"
+```
+
+## Demo with UDF
+
+### Prerequisites
+- Deploy the **Oltra** UDF Deployment
+- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
+
+### Step 1. Go to Terrafrom directory
+
+Open the `VS Code` terminal and change the working directory to `tf-example`
+```
+cd tf-level-1
+```
+
+Review files `web01.json` and `web01.tf` to understand better the configuration.
+
+Open and review the following files to get a better understanding on how the configuration is structured.
+ - **web01.json**
+ - **web01.tf** 
+
+
+### Step 2. Terraform init
+Initialize Terraform on the working directory, to download the necessary provider plugins (BIGIP) and setup the modules and backend for storing your infrastructure's state
+
+```cmd
+terraform init
+```
+
+### Step 3. Terraform plan
+
+Run the **terraform plan** command to create a plan consisting of a set of changes that will make your resources match your configuration. 
+
+```cmd
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+The output of the above command should be similar to the following
+
+```tf
+Terraform will perform the following actions:
+
+  # bigip_as3.web01 will be created
+  + resource "bigip_as3" "web01" {
+      + application_list = (known after apply)
+      + as3_json         = jsonencode(
+            {
+              + path_web01    = {
+                  + class         = "Application"
+                  + pool          = {
+                      + class   = "Pool"
+                      + members = [
+                          + {
+                              + serverAddresses = [
+                                  + "10.1.20.21",
+                                ]
+                              + servicePort     = 30880
+                            },
+                        ]
+                    }
+                  + vs_name_web01 = {
+                      + class            = "Service_HTTP"
+                      + pool             = "pool"
+                      + virtualAddresses = [
+                          + "10.1.10.200",
+                        ]
+                    }
+                }
+              + schemaVersion = "3.50.1"
+            }
+        )
+      + id               = (known after apply)
+      + ignore_metadata  = true
+      + per_app_mode     = (known after apply)
+      + task_id          = (known after apply)
+      + tenant_filter    = "example"
+      + tenant_list      = (known after apply)
+      + tenant_name      = "example"
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: tfplan
+```
+
+> [!NOTE]
+> Review the actions Terraform would take to modify your infrastructure before moving to the next step.
+
+
+### Step 4. Terraform apply
+
+Run the **terraform apply** command to deploy the changes identified from the `plan` stage.
+
+```cmd
+terraform apply -parallelism=1 tfplan
+```
+
+
+### Step 5. Change the configuration
+
+Edit the `web01.json` file and change the IP Address configured for this service (10.1.10.200 -> 10.1.10.201)
+Re-run **terrafrom plan** command to create the plan and review the suggested changes.
+
+```cmd
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+
+The output of the above command should be similar to the following
+
+```tf
+Terraform will perform the following actions:
+
+  # bigip_as3.web01 will be updated in-place
+  ~ resource "bigip_as3" "web01" {
+      ~ as3_json         = jsonencode(
+          ~ {
+              ~ path_app1     = {
+                  ~ app1      = {
+                      ~ virtualAddresses = [
+                          ~ "10.1.10.200" -> "10.1.10.201",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    }
+                    # (2 unchanged attributes hidden)
+                }
+                # (1 unchanged attribute hidden)
+            }
+        )
+        id               = "prod"
+        # (7 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+```
+
+To deploy the suggested changes run the following command.
 
 ```cmd
 terraform apply -parallelism=1 "tfplan"
