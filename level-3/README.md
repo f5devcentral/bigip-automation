@@ -1,4 +1,4 @@
-# Introducing Pipelines and remote State to the Automation Framework
+# Introducing Pipelines and remote State
 
 In our `Level-2` use case, we moved our Terraform code to Git, enabling us to leverage a reliable version control system. However, users continued to execute Terraform commands from their local machines.
 
