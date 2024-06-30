@@ -11,7 +11,7 @@ In this repository, we will explore five use cases, each being the evolution of 
 The BIG-IP Automation Framework is structured into five distinct levels, allowing users to select the automation framework that best fits their needs based on both functionality and their skill levels. Each level is designed to build upon the previous one, progressively introducing more advanced concepts and capabilities. This tiered approach ensures that users can start with the basics and gradually advance to more sophisticated automation techniques as they become more comfortable and experienced. The levels include:
 
 - **[Level 1 - Per App AS3 with Terraform](level-1/README.md)**. In this stage, users are exposed to the foundational concepts and practices for automating F5 BIG-IP systems. It is designed to help both new and experienced users to efficiently manage and automate their BIG-IP environments in a very simple manner. 
-- **[Level 2 - Introducing GIT](level-2/README.md)**. In Level-2 we introduce Git version control capabilities that allows automation owners to track every change made to the codebase, making it easy to identify who made specific changes, when they were made, and why.
+- **[Level 2 - Utilizing Git for Robust Version Control](level-2/README.md)**. In Level-2 we introduce Git version control capabilities that allows automation owners to track every change made to the codebase, making it easy to identify who made specific changes, when they were made, and why.
 - **[Level 3 - Using Pipelines](level-3/README.md)**. The Level 3 focuses on enhancing F5 BIG-IP automation by introducing remote Terraform state and CI/CD pipelines. These additions ensure consistency, streamline deployment processes, and provide centralized management for infrastructure changes.
 - **[Level 4 - Collaborating with Merge Requests](level-4/README.md)**. The Level 4 introduces collaboration features for F5 BIG-IP automation using Git branches and merge requests. These features enable multiple team members to work on different tasks simultaneously, review each other's work, and ensure high code quality before changes are merged into the main branch.
 - **[Level 5 - Self Service Deployments](level-5/README.md)**. In `Level-5`, we enhance the automation framework to enable customers or teams to create their own configurations for the BIG-IP platform. In this scenario, each customer/team manages their own Git repository, where they can make changes and commit configurations.
@@ -19,7 +19,7 @@ The BIG-IP Automation Framework is structured into five distinct levels, allowin
 
 ## Table of Contexts
 
-- [Introduction](#automating-bigip-with-per-app-as3-and-terraform)
+- [Introduction](#creating-an-automation-framework-with-per-app-as3)
 - [Technologies used](#technologies-used)
   - [Working with AS3 and Terraform](#working-with-as3-and-terraform)
     - [Creating an AS3 resource](#creating-an-as3-resource)
