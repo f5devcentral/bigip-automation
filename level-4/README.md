@@ -1,4 +1,5 @@
-# Including branches and Merge Requests
+# Enhancing Team Collaboration with Branches and Merge Requests
+
 In all previous scenarios (levels) there was primarily a single user that was using the automation framework to deploy services on BIGIP platforms. In `Level-4` we are going to show how can a team of BIGIP Admins/Users can create a platform that they can collaborate effectively and automate the deployment of services. To achieve that we are introducing **Branches** and **Merge Requests** to the automation framework. 
   1. **Git Branches**. 
       - Branches allow multiple users to work on different task or changes simultaneously without interfering with the main code.
