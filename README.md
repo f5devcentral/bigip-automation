@@ -1,4 +1,4 @@
-# Creating an Automation Framework with Per-App AS3
+# Creating an Automation Framework for F5 BIGIP
 
 In the modern era of IT, automation and infrastructure as code (IaC) have become very important in streamlining operations and enhancing the agility of organizations. Terraform, an open-source IaC tool, allows administrators to define and provision infrastructure using a high-level configuration language. When combined with F5 Per App AS3, a declarative configuration API for BIG-IP, the result is a powerful solution for managing application services more efficiently and consistently.
 
@@ -35,10 +35,9 @@ Based on the use-case (level) you choose, there could be up to four technologies
 
 - **AS3**. AS3 provides a declarative interface, enabling the management of application-specific configurations on a BIG-IP system. By providing a JSON declaration rather than a series of imperative commands, AS3 ensures precise configuration orchestration. We utilize the latest Per-App AS3 feature to optimize configuration granularity. You can find more information on [https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/](https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/)
 
-- **F5 BIG-IP Terraform Provider**. The F5 BIG-IP Terraform Provider helps you manage and provision your BIG-IP configurations in Terraform through the use of AS3/DO integration.You can find more information on [https://registry.terraform.io/providers/F5Networks/bigip/latest/docs](https://registry.terraform.io/providers/F5Networks/bigip/latest/docs)
+- **Terraform**. Terraform is an open-source infrastructure/configuration as code software tool.  It allows users to define and manage infrastructure configurations using a high-level language (HCL), enabling consistent and repeatable setup of resources across multiple cloud providers and on-premises environments. We will be using the F5 BIG-IP Terraform Provider, that helps manage and provision BIG-IP configurations through the use of AS3.You can find more information on [https://registry.terraform.io/providers/F5Networks/bigip/latest/docs](https://registry.terraform.io/providers/F5Networks/bigip/latest/docs)
 
-
-- **Git**. Git serves as the backbone of our GitOps approach, acting as the repository for storing desired configurations. It not only serves as the source of truth for AS3 configurations but also provides an audit trail of all changes made throughout the application lifecycle and enables collaboration and code reviews through the use merge requests.
+- **Git**. Git serves as the backbone of our GitOps approach, acting as the repository for storing desired configurations. It not only serves as the source of truth for AS3 and Terraform configurations but also provides an audit trail of all changes made throughout the application lifecycle and enables collaboration and code reviews through the use merge requests.
 
 - **CI/CD**. A Continuous Integration and Continuous Deployment (CI/CD) tool is crucial in automating the changes that have been identified in configuration files throughout the application lifecycle. Not only it can orchestrate the deployment of AS3 declarations with Terraform, but also integrate with 3rd party 
 ersion of YAML configurations into AS3 declarations using Jinja2 templates, and subsequent deployment of changes to the BIG-IP repositories. Additionally, CI/CD orchestrates the deployment of AS3 declarations to BIG-IP and other automation workflows, ensuring a seamless and efficient process.
