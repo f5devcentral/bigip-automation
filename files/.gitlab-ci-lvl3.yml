@@ -12,8 +12,7 @@ workflow:
 
 # List of variables
 variables:
-  TF_DIR: ${CI_PROJECT_DIR}       # Directory in which terraform files are kept
-  STATE_NAME: "tf_state_lvl_2"          # Name of terraform state used in "terraform init"command
+  STATE_NAME: "tf_state_lvl_3"          # Name of terraform state used in "terraform init"command
   ADDRESS: "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
   GIT_USERNAME: "<<<change with Gitlab username>>>"
   GITLAB_ACCESS_TOKEN: "<<<change with Gitlab personal-access-token>>>"
@@ -22,7 +21,6 @@ variables:
 
 # Stages of the pipeline
 stages:
-  - validation
   - plan
   - apply
 
@@ -31,21 +29,13 @@ image:
   name: skenderidis/ansible-runner:terraform
   entrypoint: [""]
 
-verify:
-  stage: validation
-  script:
-    - echo "ok"
-  only:
-    - main
-  
-
 # To check the TF plan for any changes on the BIGIP Virtual Servers
 plan:
   stage: plan
   script:
     # Initialize variables and get terraform version for troubleshooting
     - terraform --version
-    - cd ${TF_DIR}            # To get inside the working directory
+    - cd ${CI_PROJECT_DIR}            # To get inside the working directory
     # To initiate terraform backend / gitlab managed terraform state
     - |
       terraform init \
@@ -90,14 +80,13 @@ plan:
   only:
     - main
 
-
 # To apply the TF plan for any changes on the BIGIP Virtual Servers
 apply:
   stage: apply
   script:
     # Initialize variables and get terraform version for troubleshooting
     - terraform --version
-    - cd ${TF_DIR}            # To get inside the working directory
+    - cd ${CI_PROJECT_DIR}            # To get inside the working directory
     # To initiate terraform backend / gitlab managed terraform state
     - |
       terraform init \

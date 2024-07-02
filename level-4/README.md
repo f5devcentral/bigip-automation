@@ -187,7 +187,7 @@ curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/fil
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/main.tf -o modules/as3_http/main.tf
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitignore -o .gitignore
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/providers-lvl3-4.tf -o providers.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/providers-lvl3-4.tf -o providers-lvl3-4.tf
 ```
 
 Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
@@ -248,14 +248,12 @@ docker run -d --name gitlab-runner --restart always \
 ### Step 4. Register your GitLab Runner
 
 Log on to **GitLab.com** and go to the repository you have created.
-Go to `Setttings`->`CI/CD`->`Runners` and under project runners copy the `registration token` as shown on the picture below.
+
+Copy the `registration token` that can be be found under `Setttings`->`CI/CD`->`Runners`.
 
 <p align="center">
   <img src="../images/token-lvl3.png" style="width:75%">
 </p>
-
-> [!IMPORTANT]
-> Before registering the runner, disable **Instance runners** so that you don't use GitLab-hosted runners.
 
 Use the following docker exec command to start the registration process:
 ```
@@ -271,12 +269,22 @@ You will be asked to fill in the following:
 - Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: *** Select docker ***
 - Enter the default Docker image (for example, ruby:2.7):
 
+Once the registration is complete you should be able to see that the runner under the assigned project runners.
+
+<p align="center">
+  <img src="../images/project-runners.png" style="width:75%">
+</p>
+
+> [!IMPORTANT]
+> Before moving to the next step, disable the **Instance runners** so that you don't use GitLab-hosted runners.
+
+
 ### Step 5. Create the pipeline
 
 Copy the `.gitlab-ci.yml` from the **bigip-automation** repository file to the root directory of your repository.
 
 ```cmd
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/.gitlab-ci.yml -o .gitlab-ci.yml
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitlab-ci.yml -o .gitlab-ci.yml
 ```
 Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username and GIT_PASSWORD to your personal access token
 

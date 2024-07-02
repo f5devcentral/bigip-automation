@@ -4,7 +4,7 @@
 
 workflow:  
     rules:
-      - if: $CI_COMMIT_MESSAGE =~ /-draft$/
+      - if: $CI_COMMIT_MESSAGE =~ /ignore/
         when: never     
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
         when: always
@@ -15,13 +15,14 @@ workflow:
 # List of variables
 variables:
   TF_DIR: ${CI_PROJECT_DIR}       # Directory in which terraform files are kept
-  STATE_NAME: "tf_state_lvl_2"          # Name of terraform state used in "terraform init"command
-  ADDRESS: "https://git.f5k8s.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
-  TF_USERNAME: $tf_user
+  STATE_NAME: "tf_state_lvl_4"          # Name of terraform state used in "terraform init"command
+  ADDRESS: "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
+  GIT_USERNAME: "<<<change with Gitlab username>>>"
+  GITLAB_ACCESS_TOKEN: "<<<change with Gitlab personal-access-token>>>"
+
 
 # Stages of the pipeline
 stages:
-  - validation
   - plan
   - apply
 
@@ -30,23 +31,12 @@ image:
   name: skenderidis/ansible-runner:terraform
   entrypoint: [""]
 
-verify:
-  stage: validation
-  script:
-    - echo "ok"
-  only:
-    - merge_requests
-    - main
-  
-
 # To check the TF plan for any changes on the BIGIP Virtual Servers
 plan:
   stage: plan
   script:
     # Initialize variables and get terraform version for troubleshooting
     - terraform --version
-    - export GITLAB_ACCESS_TOKEN=$tf_access_token
-    - echo $GITLAB_ACCESS_TOKEN
     - cd ${TF_DIR}            # To get inside the working directory
     # To initiate terraform backend / gitlab managed terraform state
     - |
@@ -54,7 +44,7 @@ plan:
       -backend-config=address=${ADDRESS} \
       -backend-config=lock_address=${ADDRESS}/lock \
       -backend-config=unlock_address=${ADDRESS}/lock \
-      -backend-config=username=${TF_USERNAME} \
+      -backend-config=username=${GIT_USERNAME} \
       -backend-config=password=${GITLAB_ACCESS_TOKEN} \
       -backend-config=lock_method=POST \
       -backend-config=unlock_method=DELETE \
@@ -100,8 +90,6 @@ apply:
   script:
     # Initialize variables and get terraform version for troubleshooting
     - terraform --version
-    - export GITLAB_ACCESS_TOKEN=$tf_access_token
-    - echo $GITLAB_ACCESS_TOKEN
     - cd ${TF_DIR}            # To get inside the working directory
     # To initiate terraform backend / gitlab managed terraform state
     - |
@@ -109,7 +97,7 @@ apply:
       -backend-config=address=${ADDRESS} \
       -backend-config=lock_address=${ADDRESS}/lock \
       -backend-config=unlock_address=${ADDRESS}/lock \
-      -backend-config=username=${TF_USERNAME} \
+      -backend-config=username=${GIT_USERNAME} \
       -backend-config=password=${GITLAB_ACCESS_TOKEN} \
       -backend-config=lock_method=POST \
       -backend-config=unlock_method=DELETE \
