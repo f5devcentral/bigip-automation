@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "3.50.1",
+  "path_web01": {
+      "class": "Application",
+      "vs_name_web01": {
+          "class": "Service_HTTP",
+          "virtualAddresses": [
+              "10.1.10.200"
+          ],
+          "pool": "pool"
+      },
+      "pool": {
+          "class": "Pool",
+          "members": [
+              {
+                  "servicePort": 30880,
+                  "serverAddresses": [
+                      "10.1.20.21"
+                  ]
+              }
+          ]
+      }
+  }
+}
+
+

@@ -329,6 +329,97 @@ Navigate through the different stages to review the logs and the artifacts that 
   <img src="../images/pipelines-lvl3.gif" style="width:80%">
 </p>
 
+
 ## Demo on your local environment
 
-********  PENDING  **********
+### Prerequisites
+- Terraform must be installed on your local machine that you will be running the demo. The demo has been tested with Terraform v1.8.1
+- BIGIP running version v15 (or higher)
+- Installed AS3 version on BIGIP should be 3.50 (or higher)
+- GitLab account
+
+> [!NOTE]
+> The instructions provided for this demo will work on macOS and Linux users. However, for Windows users, keep in mind that modifications might be needed before running the code. 
+
+### Step 1. Create a repository on GitLab.com
+
+Create a new repository on GitLab and clone it to your local machine.
+```
+git clone https://gitlab.com/<account>/<repo-name>
+```
+
+Clone this repository, so that we can copy the required files to your **new** repo on GitLab.
+```
+git clone https://github.com/f5devcentral/bigip-automation
+cp -R bigip-automation/level-1/modules/*  <repo-name>/
+cp bigip-automation/level-1/providers.tf <repo-name>/
+```
+
+Commit and push the changes back to GitLab.
+
+```
+cd <repo-name>
+git add .
+git commit -m "Initial files"
+git push origin
+```
+
+> [!Note]
+> You should be asked for username and password when you push the repository. 
+
+
+### Step 2. Create a GitLab Runner
+With GitLab you can use either privately-hosted or GitLab-hosted runners. For this demo, we recommend that you use a privately-hosted runners so that you don't have to expose F5's Management interface to the internet. 
+In the following few steps we will show how to install and configure your own Gitlab runner in a docker environment. If you want to deploy it in a different environment or you can find more information regarding GitLab runners click <a href="https://docs.gitlab.com/ee/tutorials/create_register_first_runner/"> here </a>
+
+
+Create the Docker volume:
+```
+docker volume create gitlab-runner-config
+```
+
+Start the GitLab Runner container using the volume we just created:
+```
+docker run -d --name gitlab-runner --restart always \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v gitlab-runner-config:/etc/gitlab-runner \
+    gitlab/gitlab-runner:latest
+```
+
+### Step 3. Register your GitLab Runner
+
+
+
+
+
+Create a file called `.gitlab-ci.yml` in git's root directory that will contain the pipeline you want to run. 
+
+```cmd
+cat <<EOF > app2.tf
+module "app2" {
+    source              = "./modules/as3_http"
+    name                = "app2"
+    virtualIP           = "10.1.10.42"
+    serverAddresses     = ["10.1.20.21"]
+    servicePort         = 30880
+    partition           = "prod"
+    providers = {
+      bigip = bigip.dmz
+    }    
+}
+EOF
+```
+
+stages:
+  - build
+  - test
+
+job_build:
+  stage: build
+  script:
+    - echo "Building the project"
+
+job_test:
+  stage: test
+  script:
+    - echo "Running tests"

@@ -13,8 +13,9 @@ provider "bigip" {
     password = "Kostas1234"
     alias=  "dmz"
 }
+
 /*
-# How to add multiple providers
+# How to add multiple providers - example
 provider "bigip" {
     address = "10.1.20.112"
     username = "admin"

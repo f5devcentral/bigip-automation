@@ -27,6 +27,7 @@ The BIG-IP Automation Framework is structured into five distinct levels, allowin
     - [Deleting an AS3 resource](#deleting-an-as3-resource)
   - [Best Practices](#best-practices-for-bigip-tmos)
 - [Demo with UDF](#demo-with-udf)  
+- [Demo on your local environment](#demo-on-your-local-environment)  
 
 
 ## Technologies used
@@ -350,3 +351,166 @@ To deploy the suggested changes run the following command.
 ```cmd
 terraform apply -parallelism=1 "tfplan"
 ```
+
+
+
+
+## Demo on your local environment
+
+### Prerequisites
+- Terraform must be installed on your local machine that you will be running the demo. The demo has been tested with Terraform v1.8.1
+- BIGIP running version v15 (or higher)
+- Installed AS3 version on BIGIP should be 3.50 (or higher)
+
+> [!NOTE]
+> The instructions provided for this demo will work on macOS and Linux users. However, for Windows users, keep in mind that modifications might be needed before running the code. 
+
+### Step 1. Clone the repo
+
+On your terminal clone the current repository.
+```
+git clone https://github.com/f5devcentral/bigip-automation
+```
+
+Change directory to `tf-example`
+```
+cd bigip-automation/tf-example
+```
+
+### Step 2. Modify the files
+
+Change the values within the files to reflect your local environment.
+
+On the **provider.tf** file change the following: 
+- `address` to the IP of your BIGIP device.
+- `username` to an admin account from your BIGIP device.
+- `password` for the admin account that you selected.
+
+On the AS3 declarations that is saved on **web01.json** change the following: 
+- `virtualAddresses` to an IP address that you want the VirtualServer to listen to.
+- `serverAddresses` to the port number of the backend servers.
+- `servicePort` to the IP addresses for the backend servers.
+
+
+### Step 3. Terraform init
+Initialize Terraform on the working directory, to download the necessary provider plugins (BIGIP) and setup the modules and backend for storing your infrastructure's state
+
+```cmd
+terraform init
+```
+
+### Step 3. Terraform plan
+
+Run the **terraform plan** command to create a plan consisting of a set of changes that will make your resources match your configuration. 
+
+```cmd
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+The output of the above command should be similar to the following
+
+```tf
+Terraform will perform the following actions:
+
+  # bigip_as3.web01 will be created
+  + resource "bigip_as3" "web01" {
+      + application_list = (known after apply)
+      + as3_json         = jsonencode(
+            {
+              + path_web01    = {
+                  + class         = "Application"
+                  + pool          = {
+                      + class   = "Pool"
+                      + members = [
+                          + {
+                              + serverAddresses = [
+                                  + "10.1.20.21",
+                                ]
+                              + servicePort     = 30880
+                            },
+                        ]
+                    }
+                  + vs_name_web01 = {
+                      + class            = "Service_HTTP"
+                      + pool             = "pool"
+                      + virtualAddresses = [
+                          + "10.1.10.200",
+                        ]
+                    }
+                }
+              + schemaVersion = "3.50.1"
+            }
+        )
+      + id               = (known after apply)
+      + ignore_metadata  = true
+      + per_app_mode     = (known after apply)
+      + task_id          = (known after apply)
+      + tenant_filter    = "example"
+      + tenant_list      = (known after apply)
+      + tenant_name      = "example"
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: tfplan
+```
+
+> [!NOTE]
+> Review the actions Terraform would take to modify your infrastructure before moving to the next step.
+
+
+### Step 4. Terraform apply
+
+Run the **terraform apply** command to deploy the changes identified from the `plan` stage.
+
+```cmd
+terraform apply -parallelism=1 tfplan
+```
+
+
+### Step 5. Change the configuration
+
+Edit the `web01.json` file and change the IP Address configured for this service.
+Re-run **terrafrom plan** command to create the plan and review the suggested changes.
+
+```cmd
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+
+The output of the above command should be similar to the following
+
+```tf
+Terraform will perform the following actions:
+
+  # bigip_as3.web01 will be updated in-place
+  ~ resource "bigip_as3" "web01" {
+      ~ as3_json         = jsonencode(
+          ~ {
+              ~ path_app1     = {
+                  ~ app1      = {
+                      ~ virtualAddresses = [
+                          ~ "10.1.10.200" -> "10.1.10.201",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    }
+                    # (2 unchanged attributes hidden)
+                }
+                # (1 unchanged attribute hidden)
+            }
+        )
+        id               = "prod"
+        # (7 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+```
+
+To deploy the suggested changes run the following command.
+
+```cmd
+terraform apply -parallelism=1 "tfplan"
+```
+
+
+
