@@ -183,11 +183,11 @@ Use this repository to copy the module files to your **new** repo on GitLab.
 ```
 mkdir modules
 mkdir modules/as3_http
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/modules/as3_http/as3.tpl -o modules/as3_http/as3.tpl
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/modules/as3_http/main.tf -o modules/as3_http/main.tf
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/.gitignore -o .gitignore
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/providers.tf -o providers.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/as3.tpl -o modules/as3_http/as3.tpl
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/main.tf -o modules/as3_http/main.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitignore -o .gitignore
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/providers-lvl3-4.tf -o providers.tf
 ```
 
 Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
