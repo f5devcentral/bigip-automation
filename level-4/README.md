@@ -155,3 +155,188 @@ Click on each stage to see the logs but also the artifacts that the pipeline is 
 > [!NOTE]
 > Notice that the pipeline that runs on Merge Request is different than the pipeline that runs on the `main` branch.
 
+
+
+
+
+## Demo on your local environment
+
+### Prerequisites
+- Terraform must be installed on your local machine that you will be running the demo. The demo has been tested with Terraform v1.8.1
+- BIGIP running version v15 (or higher)
+- Installed AS3 version on BIGIP should be 3.50 (or higher)
+- GitLab account
+- Docker that would host GitLab-Runner
+
+> [!NOTE]
+> The instructions provided for this demo will work on macOS and Linux users. However, for Windows users, keep in mind that modifications might be needed before running the code. 
+
+### Step 1. Create a repository on GitLab.com
+
+Create a new repository on GitLab and clone it to your local machine.
+```
+git clone https://gitlab.com/<account>/<repo-name>
+cd <repo-name>
+```
+
+Use this repository to copy the module files to your **new** repo on GitLab.
+```
+mkdir modules
+mkdir modules/as3_http
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/modules/as3_http/as3.tpl -o modules/as3_http/as3.tpl
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/modules/as3_http/main.tf -o modules/as3_http/main.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/.gitignore -o .gitignore
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/providers.tf -o providers.tf
+```
+
+Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
+
+Commit and push the changes back to GitLab.
+```
+git add .
+git commit -m "Initial files"
+git push origin
+```
+
+> [!Note]
+> You should be asked for username and password when you push the repository back to GitLab. 
+
+### Step 2. Create a personal access token
+> [!NOTE]
+> You can use the same personal access token, that you created during `Level-3` Demo.
+
+Follow the instruction below to create a personal access token. 
+
+1. On the left sidebar, select your avatar.
+1. Select Edit profile.
+1. On the left sidebar, select Access Tokens.
+1. Select Add new token.
+1. Enter a name and expiry date for the token.
+    - If you do not enter an expiry date, the expiry date is automatically set to 365 days later than the current date.
+    - By default, this date can be a maximum of 365 days later than the current date.
+1. Select the desired scopes.
+1. Select create personal access token.
+
+Copy your new personal access token and make sure you save it - you won't be able to access it again.
+
+
+### Step 3. Create a GitLab Runner
+> [!NOTE]
+> You can skip this step if you have already created the GitLab runner during the `Level-3` Demo.
+
+With GitLab you can use either privately-hosted or GitLab-hosted runners. For this demo, we recommend that you use a privately-hosted runners so that you don't have to expose F5's Management interface to the internet. 
+In the following few steps we will show how to install and configure your own Gitlab runner in a docker environment. If you want to deploy it in a different environment or you can find more information regarding GitLab runners click <a href="https://docs.gitlab.com/ee/tutorials/create_register_first_runner/"> here </a>
+
+
+Create the Docker volume:
+```
+docker volume create gitlab-runner-config
+```
+
+Start the GitLab Runner container using the volume we just created:
+```
+docker run -d --name gitlab-runner --restart always \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v gitlab-runner-config:/etc/gitlab-runner \
+    gitlab/gitlab-runner:latest
+```
+
+> [!NOTE]
+> If the states during the pipleline are getting queued for more than 5-10 seconds then you can improve that by changing the concurrency to **5** in the `config.toml` file. If you are using Ubuntu you can find this file in the following folder `/var/lib/docker/volumes/gitlab-runner-config/_data/` 
+
+### Step 4. Register your GitLab Runner
+
+Log on to **GitLab.com** and go to the repository you have created.
+Go to `Setttings`->`CI/CD`->`Runners` and under project runners copy the `registration token` as shown on the picture below.
+
+<p align="center">
+  <img src="../images/token-lvl3.png" style="width:75%">
+</p>
+
+> [!IMPORTANT]
+> Before registering the runner, disable **Instance runners** so that you don't use GitLab-hosted runners.
+
+Use the following docker exec command to start the registration process:
+```
+docker exec -it gitlab-runner gitlab-runner register
+```
+You will be asked to fill in the following:
+
+- Enter the GitLab instance URL (for example, https://gitlab.com/):
+- Enter the registration token:
+- Enter a description for the runner:
+- Enter tags for the runner (comma-separated): *** Leave Blank ***
+- Enter optional maintenance note for the runner:
+- Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: *** Select docker ***
+- Enter the default Docker image (for example, ruby:2.7):
+
+### Step 5. Create the pipeline
+
+Copy the `.gitlab-ci.yml` from the **bigip-automation** repository file to the root directory of your repository.
+
+```cmd
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/.gitlab-ci.yml -o .gitlab-ci.yml
+```
+Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username and GIT_PASSWORD to your personal access token
+
+
+Commit and push the changes back to GitLab. We are adding the word "ignore" on the commit message to avoid triggering the pipeline 
+```
+git add .
+git commit -m "Creating Pipeline - ignore -"
+git push origin
+```
+
+### Step 6. Create a new configuration
+Create the configuration to publish a new application and save the file as `app3.tf`.
+
+```cmd
+cat <<EOF > app50.tf
+module "app50" {
+    source              = "./modules/as3_http"
+    name                = "app50"
+    virtualIP           = "10.1.10.45"
+    serverAddresses     = ["10.1.20.21"]
+    servicePort         = 30880
+    partition           = "prod"
+    providers = {
+      bigip = bigip.dmz
+    }    
+}
+EOF
+```
+
+Run the following commands that will push the changes made on the configuration files back to the origin Git repository and create a merge request.
+
+```cmd
+git add .
+git commit -m "Adding application app50"
+git push -u origin HEAD \
+  -o merge_request.create \
+  -o merge_request.title="New Merge Request $(git branch --show-current)" \
+  -o merge_request.description="This MR was create to deploy app50" \
+  -o merge_request.target=main \
+  -o merge_request.remove_source_branch \
+  -o merge_request.squash
+```
+
+### Step 5. Login to Git to review the Merge Request.
+
+Log on to **GitLab.com** and go to the repository you have created.
+<p align="center">
+  <img src="../images/repo-lvl4.png" style="width:75%">
+</p>
+
+Go to the Merge Requests page to review the suggested changes. Once you review the changes and the pipeline results, approve the MR and click `merge`
+
+<p align="center">
+  <img src="../images/merge-lvl4.gif" style="width:75%">
+</p>
+
+Check that the changes **`app50.tf`** are now pushed to the main repository and branch **app50** has been removed.  
+<p align="center">
+  <img src="../images/repo-lvl4-1.png" style="width:75%">
+</p>
+
+

@@ -344,20 +344,24 @@ Navigate through the different stages to review the logs and the artifacts that 
 Create a new repository on GitLab and clone it to your local machine.
 ```
 git clone https://gitlab.com/<account>/<repo-name>
+cd <repo-name>
 ```
 
 Use this repository to copy the module files to your **new** repo on GitLab.
 ```
-git clone https://github.com/f5devcentral/bigip-automation
-cp -R bigip-automation/level-1/* <repo-name>
-cp bigip-automation/level-3/.gitignore <repo-name>
+mkdir modules
+mkdir modules/as3_http
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/as3.tpl -o modules/as3_http/as3.tpl
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/main.tf -o modules/as3_http/main.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/.gitignore -o .gitignore
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/providers.tf -o providers.tf
 ```
 
 Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
 
 Commit and push the changes back to GitLab.
 ```
-cd <repo-name>
 git add .
 git commit -m "Initial files"
 git push origin
@@ -400,6 +404,9 @@ docker run -d --name gitlab-runner --restart always \
     gitlab/gitlab-runner:latest
 ```
 
+> [!NOTE]
+> If the states during the pipleline are getting queued for more than 5-10 seconds then you can improve that by changing the concurrency to **5** in the `config.toml` file. If you are using Ubuntu you can find this file in the following folder `/var/lib/docker/volumes/gitlab-runner-config/_data/` 
+
 ### Step 4. Register your GitLab Runner
 
 Log on to **GitLab.com** and go to the repository you have created.
@@ -416,13 +423,23 @@ Use the following docker exec command to start the registration process:
 ```
 docker exec -it gitlab-runner gitlab-runner register
 ```
+You will be asked to fill in the following:
+
+- Enter the GitLab instance URL (for example, https://gitlab.com/):
+- Enter the registration token:
+- Enter a description for the runner:
+- Enter tags for the runner (comma-separated): *** Leave Blank ***
+- Enter optional maintenance note for the runner:
+- Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: *** Select docker ***
+- Enter the default Docker image (for example, ruby:2.7):
+
 
 ### Step 5. Create the pipeline
 
 Copy the `.gitlab-ci.yml` from the **bigip-automation** repository file to the root directory of your repository.
 
 ```cmd
-cp ../bigip-automation/level-3/.gitlab-ci.yml .
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/.gitlab-ci.yml -o .gitlab-ci.yml
 ```
 Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username and GIT_PASSWORD to your personal access token
 
@@ -430,12 +447,11 @@ Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username an
 Commit and push the changes back to GitLab. We are adding the word "ignore" on the commit message to avoid triggering the pipeline 
 ```
 git add .
-git commit -m "Creating Pipeline - ignore."
+git commit -m "Creating Pipeline - ignore -"
 git push origin
 ```
 
-
-### Step 3. Create a new configuration
+### Step 6. Create a new configuration
 Create the configuration to publish a new application and save the file as `app3.tf`.
 
 ```cmd
@@ -454,14 +470,6 @@ module "app3" {
 EOF
 ```
 
-### Step 4. Commit the changes to Git
-Add you details on Git so that any changes you make will include your name. This will make it easier in the future to identify who made the change.
-
-```cmd
-git config user.name "John Doe"
-git config user.email "j.doe@f5.com"
-```
-
 Run the following commands that will push the changes made on the configuration files back to the origin Git repository
 ```cmd
 git add .
@@ -469,11 +477,10 @@ git commit -m "Adding application app03"
 git push
 ```
 
+
 ### Step 5. Login to Git to review the pipeline output.
 
-Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.
-
-Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_3`. 
+Log on to **GitLab.com** and go to the repository you have created.
 
 <p align="center">
   <img src="../images/repo-lvl3.gif" style="width:80%">

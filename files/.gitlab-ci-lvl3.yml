@@ -4,7 +4,7 @@
 
 workflow:  
     rules:
-      - if: $CI_COMMIT_MESSAGE =~ /-draft$/
+      - if: $CI_COMMIT_MESSAGE =~ /ignore/
         when: never     
       - if: $CI_COMMIT_BRANCH == "main"
         when: always
