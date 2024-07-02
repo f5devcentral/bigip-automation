@@ -89,10 +89,8 @@ The pipeline is triggered based on specific conditions:
 ```yml
 workflow:  
     rules:
-      - if: $CI_COMMIT_MESSAGE =~ /-draft$/
-        when: never     
-      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-        when: always
+      - if: $CI_COMMIT_MESSAGE =~ /draft$/
+        when: never
       - if: $CI_COMMIT_BRANCH == "main"
         when: always
       - when: never
@@ -209,7 +207,6 @@ plan:
       - tf_details
       - as3
   only:
-    - merge_requests
     - main
 
 ```
@@ -337,6 +334,7 @@ Navigate through the different stages to review the logs and the artifacts that 
 - BIGIP running version v15 (or higher)
 - Installed AS3 version on BIGIP should be 3.50 (or higher)
 - GitLab account
+- Docker that would host GitLab-Runner
 
 > [!NOTE]
 > The instructions provided for this demo will work on macOS and Linux users. However, for Windows users, keep in mind that modifications might be needed before running the code. 
@@ -348,15 +346,16 @@ Create a new repository on GitLab and clone it to your local machine.
 git clone https://gitlab.com/<account>/<repo-name>
 ```
 
-Clone this repository, so that we can copy the required files to your **new** repo on GitLab.
+Use this repository to copy the module files to your **new** repo on GitLab.
 ```
 git clone https://github.com/f5devcentral/bigip-automation
-cp -R bigip-automation/level-1/modules/*  <repo-name>/
-cp bigip-automation/level-1/providers.tf <repo-name>/
+cp -R bigip-automation/level-1/* <repo-name>
+cp bigip-automation/level-3/.gitignore <repo-name>
 ```
 
-Commit and push the changes back to GitLab.
+Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
 
+Commit and push the changes back to GitLab.
 ```
 cd <repo-name>
 git add .
@@ -365,10 +364,25 @@ git push origin
 ```
 
 > [!Note]
-> You should be asked for username and password when you push the repository. 
+> You should be asked for username and password when you push the repository back to GitLab. 
+
+### Step 2. Create a personal access token
+Follow the instruction below to create a personal access token. 
+
+1. On the left sidebar, select your avatar.
+1. Select Edit profile.
+1. On the left sidebar, select Access Tokens.
+1. Select Add new token.
+1. Enter a name and expiry date for the token.
+    - If you do not enter an expiry date, the expiry date is automatically set to 365 days later than the current date.
+    - By default, this date can be a maximum of 365 days later than the current date.
+1. Select the desired scopes.
+1. Select create personal access token.
+
+Copy your new personal access token and make sure you save it - you won't be able to access it again.
 
 
-### Step 2. Create a GitLab Runner
+### Step 3. Create a GitLab Runner
 With GitLab you can use either privately-hosted or GitLab-hosted runners. For this demo, we recommend that you use a privately-hosted runners so that you don't have to expose F5's Management interface to the internet. 
 In the following few steps we will show how to install and configure your own Gitlab runner in a docker environment. If you want to deploy it in a different environment or you can find more information regarding GitLab runners click <a href="https://docs.gitlab.com/ee/tutorials/create_register_first_runner/"> here </a>
 
@@ -386,20 +400,50 @@ docker run -d --name gitlab-runner --restart always \
     gitlab/gitlab-runner:latest
 ```
 
-### Step 3. Register your GitLab Runner
+### Step 4. Register your GitLab Runner
 
+Log on to **GitLab.com** and go to the repository you have created.
+Go to `Setttings`->`CI/CD`->`Runners` and under project runners copy the `registration token` as shown on the picture below.
 
+<p align="center">
+  <img src="../images/token-lvl3.png" style="width:75%">
+</p>
 
+> [!IMPORTANT]
+> Before registering the runner, disable **Instance runners** so that you don't use GitLab-hosted runners.
 
+Use the following docker exec command to start the registration process:
+```
+docker exec -it gitlab-runner gitlab-runner register
+```
 
-Create a file called `.gitlab-ci.yml` in git's root directory that will contain the pipeline you want to run. 
+### Step 5. Create the pipeline
+
+Copy the `.gitlab-ci.yml` from the **bigip-automation** repository file to the root directory of your repository.
 
 ```cmd
-cat <<EOF > app2.tf
-module "app2" {
+cp ../bigip-automation/level-3/.gitlab-ci.yml .
+```
+Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username and GIT_PASSWORD to your personal access token
+
+
+Commit and push the changes back to GitLab. We are adding the word "ignore" on the commit message to avoid triggering the pipeline 
+```
+git add .
+git commit -m "Creating Pipeline - ignore."
+git push origin
+```
+
+
+### Step 3. Create a new configuration
+Create the configuration to publish a new application and save the file as `app3.tf`.
+
+```cmd
+cat <<EOF > app3.tf
+module "app3" {
     source              = "./modules/as3_http"
-    name                = "app2"
-    virtualIP           = "10.1.10.42"
+    name                = "app3"
+    virtualIP           = "10.1.10.44"
     serverAddresses     = ["10.1.20.21"]
     servicePort         = 30880
     partition           = "prod"
@@ -410,16 +454,41 @@ module "app2" {
 EOF
 ```
 
-stages:
-  - build
-  - test
+### Step 4. Commit the changes to Git
+Add you details on Git so that any changes you make will include your name. This will make it easier in the future to identify who made the change.
 
-job_build:
-  stage: build
-  script:
-    - echo "Building the project"
+```cmd
+git config user.name "John Doe"
+git config user.email "j.doe@f5.com"
+```
 
-job_test:
-  stage: test
-  script:
-    - echo "Running tests"
+Run the following commands that will push the changes made on the configuration files back to the origin Git repository
+```cmd
+git add .
+git commit -m "Adding application app03"
+git push
+```
+
+### Step 5. Login to Git to review the pipeline output.
+
+Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.
+
+Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_3`. 
+
+<p align="center">
+  <img src="../images/repo-lvl3.gif" style="width:80%">
+</p>
+
+
+Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
+
+<p align="center">
+  <img src="../images/pipelines-lvl3.png" style="width:60%">
+</p>
+
+
+Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
+
+<p align="center">
+  <img src="../images/pipelines-lvl3.gif" style="width:80%">
+</p>
