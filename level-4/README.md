@@ -162,9 +162,8 @@ Click on each stage to see the logs but also the artifacts that the pipeline is 
 ## Demo on your local environment
 
 ### Prerequisites
-- Terraform must be installed on your local machine that you will be running the demo. The demo has been tested with Terraform v1.8.1
 - BIGIP running version v15 (or higher)
-- Installed AS3 version on BIGIP should be 3.50 (or higher)
+- Installed AS3 (v3.50 or higher) on BIGIP 
 - GitLab account
 - Docker that would host GitLab-Runner
 
@@ -284,7 +283,7 @@ Once the registration is complete you should be able to see that the runner unde
 Copy the `.gitlab-ci.yml` from the **bigip-automation** repository file to the root directory of your repository.
 
 ```cmd
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitlab-ci.yml -o .gitlab-ci.yml
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitlab-ci-lvl4.yml -o .gitlab-ci.yml
 ```
 Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username and GIT_PASSWORD to your personal access token
 
@@ -296,7 +295,16 @@ git commit -m "Creating Pipeline - ignore -"
 git push origin
 ```
 
-### Step 6. Create a new configuration
+### Step 6. Create a branch
+
+We will apply the new configuration to a branch instead of commiting the changes directly to `main`. The following command will create a new branch called `app50` if it doesn't already exists and switch to the new branch.
+
+```cmd
+cd tf-level-4
+git fetch origin && (git checkout app50 || git checkout -b app50)
+```
+
+### Step 7. Create a new configuration
 Create the configuration to publish a new application and save the file as `app3.tf`.
 
 ```cmd

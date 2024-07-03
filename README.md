@@ -41,7 +41,7 @@ Based on the use-case (level) you choose, there could be up to four technologies
 - **Git**. Git serves as the backbone of our GitOps approach, acting as the repository for storing desired configurations. It not only serves as the source of truth for AS3 and Terraform configurations but also provides an audit trail of all changes made throughout the application lifecycle and enables collaboration and code reviews through the use merge requests.
 
 - **CI/CD**. A Continuous Integration and Continuous Deployment (CI/CD) tool is crucial in automating the changes that have been identified in configuration files throughout the application lifecycle. Not only it can orchestrate the deployment of AS3 declarations with Terraform, but also integrate with 3rd party 
-ersion of YAML configurations into AS3 declarations using Jinja2 templates, and subsequent deployment of changes to the BIG-IP repositories. Additionally, CI/CD orchestrates the deployment of AS3 declarations to BIG-IP and other automation workflows, ensuring a seamless and efficient process.
+ersion of YAML configurations into AS3 declarations using Jinja2 templates, and subsequent deployment of changes to the BIG-IP repositories. Additionally, CI/CD orchestrates the deployment of AS3 declarations with Terraform and other automation workflows, ensuring a seamless and efficient process.
 
 By combining these components into a cohesive automation framework, organizations can achieve greater agility, scalability, and reliability in managing their F5 BIG-IP deployments. This approach empowers teams to focus on innovation and value delivery, while automation handles the repetitive and error-prone tasks associated with infrastructure configuration and deployment.
 
@@ -215,14 +215,15 @@ terraform apply -parallelism=1 "tfplan"
 ## Demo with UDF
 
 ### Prerequisites
-- Deploy the **Oltra** UDF Deployment
-- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
+- Deploy the **Oltra** UDF Deployment. Once provisioned, use the terminal on **VS Code** to run the commands in this demo. You can find **VS Code** under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
 
 ### Step 1. Go to Terrafrom directory
 
-Open the `VS Code` terminal and change the working directory to `tf-example`
+Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
+
+Change the working directory to `tf-example`.
 ```
-cd tf-level-1
+cd tf-example
 ```
 
 Review files `web01.json` and `web01.tf` to understand better the configuration.
