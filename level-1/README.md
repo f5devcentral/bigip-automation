@@ -212,10 +212,12 @@ provider "bigip" {
 
 Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
 
-Change the working directory to `tf-level-1`
+Change the working directory to `tf-level-1` 
 ```
 cd tf-level-1
 ```
+
+
 
 ### Step 2. Review the provider details
 Open and review the following files to get a better understanding on how the configuration is structured.

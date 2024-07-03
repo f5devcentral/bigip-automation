@@ -354,6 +354,72 @@ terraform apply -parallelism=1 "tfplan"
 ```
 
 
+### Step 6. Delete the configuration
+Deleting of the apps deployed can take place with 2 methods. One method would be to delete the file `web01.tf` and re-run `terraform plan` and `terraform apply` or alternatively you can run the `terraform destroy` command to delete all TF configuration.
+
+In our case, we will delete the `web01.tf` file.
+
+```cmd
+rm web01.tf
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+
+The output of the above command should be similar to the following
+```tf
+Terraform will perform the following actions:
+
+  # bigip_as3.web01 will be destroyed
+  # (because bigip_as3.web01 is not in configuration)
+  - resource "bigip_as3" "web01" {
+      - application_list = "path_web01" -> null
+      - as3_json         = jsonencode(
+            {
+              - path_web01    = {
+                  - class         = "Application"
+                  - pool          = {
+                      - class   = "Pool"
+                      - members = [
+                          - {
+                              - serverAddresses = [
+                                  - "10.1.20.21",
+                                ]
+                              - servicePort     = 30880
+                              - shareNodes      = true
+                            },
+                        ]
+                    }
+                  - vs_name_web01 = {
+                      - class            = "Service_HTTP"
+                      - pool             = "pool"
+                      - virtualAddresses = [
+                          - "10.1.10.201",
+                        ]
+                    }
+                }
+              - schemaVersion = "3.50.1"
+            }
+        ) -> null
+      - id               = "example" -> null
+      - ignore_metadata  = false -> null
+      - per_app_mode     = true -> null
+      - task_id          = "3d95db16-53ef-4806-abbe-7931779bbae6" -> null
+      - tenant_filter    = "example" -> null
+      - tenant_list      = "example" -> null
+      - tenant_name      = "example" -> null
+    }
+
+Plan: 0 to add, 0 to change, 1 to destroy.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: tfplan
+```
+
+To deploy the suggested changes run the following command.
+
+```cmd
+terraform apply -parallelism=1 "tfplan"
+```
 
 
 ## Demo on your local environment
@@ -514,4 +580,72 @@ terraform apply -parallelism=1 "tfplan"
 ```
 
 
+
+
+### Step 6. Delete the configuration
+Deleting of the apps deployed can take place with 2 methods. One method would be to delete the file `web01.tf` and re-run `terraform plan` and `terraform apply` or alternatively you can run the `terraform destroy` command to delete all TF configuration.
+
+In our case, we will delete the `web01.tf` file.
+
+```cmd
+rm web01.tf
+terraform plan -parallelism=1 -refresh=false -out=tfplan
+```
+
+The output of the above command should be similar to the following
+```tf
+Terraform will perform the following actions:
+
+  # bigip_as3.web01 will be destroyed
+  # (because bigip_as3.web01 is not in configuration)
+  - resource "bigip_as3" "web01" {
+      - application_list = "path_web01" -> null
+      - as3_json         = jsonencode(
+            {
+              - path_web01    = {
+                  - class         = "Application"
+                  - pool          = {
+                      - class   = "Pool"
+                      - members = [
+                          - {
+                              - serverAddresses = [
+                                  - "10.1.20.21",
+                                ]
+                              - servicePort     = 30880
+                              - shareNodes      = true
+                            },
+                        ]
+                    }
+                  - vs_name_web01 = {
+                      - class            = "Service_HTTP"
+                      - pool             = "pool"
+                      - virtualAddresses = [
+                          - "10.1.10.201",
+                        ]
+                    }
+                }
+              - schemaVersion = "3.50.1"
+            }
+        ) -> null
+      - id               = "example" -> null
+      - ignore_metadata  = false -> null
+      - per_app_mode     = true -> null
+      - task_id          = "3d95db16-53ef-4806-abbe-7931779bbae6" -> null
+      - tenant_filter    = "example" -> null
+      - tenant_list      = "example" -> null
+      - tenant_name      = "example" -> null
+    }
+
+Plan: 0 to add, 0 to change, 1 to destroy.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: tfplan
+```
+
+To deploy the suggested changes run the following command.
+
+```cmd
+terraform apply -parallelism=1 "tfplan"
+```
 

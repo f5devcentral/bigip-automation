@@ -322,7 +322,7 @@ git clone https://gitlab.com/<account>/<repo-name>
 cd <repo-name>
 ```
 
-Use this repository to copy the module files to your **new** repo on GitLab.
+Create the necessary files to your **new** repo on GitLab.
 ```
 mkdir modules
 mkdir modules/as3_http
