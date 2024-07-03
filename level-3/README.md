@@ -97,10 +97,10 @@ workflow:
 #### Variables
 The pipeline defines several variables:
 
-**STATE_NAME**: Name of the Terraform state used in the terraform init command.
-**ADDRESS**: URL for the remote Terraform state in GitLab.
-**GIT_USERNAME**: GIT username, provided via environment variable.
-**GITLAB_ACCESS_TOKEN**: GIT personal access token, provided via environment variable.
+- **STATE_NAME**: Name of the Terraform state used in the terraform init command.
+- **ADDRESS**: URL for the remote Terraform state in GitLab.
+- **GIT_USERNAME**: GIT username, provided via environment variable.
+- **GITLAB_ACCESS_TOKEN**: GIT personal access token, provided via environment variable.
 
 ```yml
 variables:
@@ -305,9 +305,8 @@ Go to `Pipelines` and review the execution of the lastest pipeline. You should b
 ## Demo on your local environment
 
 ### Prerequisites
-- Terraform must be installed on your local machine that you will be running the demo. The demo has been tested with Terraform v1.8.1
 - BIGIP running version v15 (or higher)
-- Installed AS3 version on BIGIP should be 3.50 (or higher)
+- Installed AS3 (v3.50 or higher) on BIGIP 
 - GitLab.com account
 - Docker that would host GitLab-Runner
 
@@ -321,16 +320,19 @@ Create a new repository on GitLab and clone it to your local machine.
 git clone https://gitlab.com/<account>/<repo-name>
 cd <repo-name>
 ```
+<p align="center">
+  <img src="../images/create-project-lvl3.png" style="width:75%">
+</p>
 
 Create the necessary files to your **new** repo on GitLab.
 ```
 mkdir modules
 mkdir modules/as3_http
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/as3.tpl -o modules/as3_http/as3.tpl
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/main.tf -o modules/as3_http/main.tf
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/.gitignore -o .gitignore
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/providers-lvl3-4.tf -o providers.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/as3.tpl -o modules/as3_http/as3.tpl
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/main.tf -o modules/as3_http/main.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitignore -o .gitignore
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/providers-lvl3-4.tf -o providers.tf
 ```
 
 Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
@@ -385,23 +387,33 @@ docker run -d --name gitlab-runner --restart always \
 
 ### Step 4. Register your GitLab Runner
 
-Copy the `registration token` that can be be found under `Setttings`->`CI/CD`->`Runners`.
+Click the button the `New project runner` that can be be found under `Setttings`->`CI/CD`->`Runners`.
 
 <p align="center">
-  <img src="../images/token-lvl3.png" style="width:75%">
+  <img src="../images/new-project-runner.png" style="width:75%">
 </p>
+
+On the following page, add a runner `description`, select the option `run untagged jobs` and press **Create runner**.
+
+<p align="center">
+  <img src="../images/new-project-runner-v2.png" style="width:75%">
+</p>
+
+In the next screen you will see the command that you need to run in order to register you gitlab-runner.
+
+<p align="center">
+  <img src="../images/register-runner.png">
+</p>
+
 
 Use the following docker exec command to start the registration process:
 ```
-docker exec -it gitlab-runner gitlab-runner register
+docker exec -it gitlab-runner gitlab-runner register --url https://gitlab.com --token <add-the-token-you-got-from-gitlab>
 ```
 You will be asked to fill in the following:
 
-- Enter the GitLab instance URL (for example, https://gitlab.com/):
-- Enter the registration token:
-- Enter a description for the runner:
-- Enter tags for the runner (comma-separated): *** Leave Blank ***
-- Enter optional maintenance note for the runner:
+- Enter the GitLab instance URL (for example, https://gitlab.com/): *** Leave Blank ***
+- Enter a description for the runner: *** Add the Description for the runner ***
 - Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: *** Select docker ***
 - Enter the default Docker image (for example, ruby:2.7):
 
@@ -462,12 +474,12 @@ git push
 Log on to **GitLab.com** and go to the repository you have created.
 
 <p align="center">
-  <img src="../images/repo-lvl3.gif" style="width:80%">
+  <img src="../images/repo-lvl3-gitlab.png" style="width:80%">
 </p>
 
 
 Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline. Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
 
 <p align="center">
-  <img src="../images/pipelines-lvl3.gif" style="width:80%">
+  <img src="../images/pipelines-lvl3-gitlab.gif" style="width:80%">
 </p>

@@ -183,7 +183,7 @@ cd <repo-name>
 ```
 
 <p align="center">
-  <img src="../images/create-project.png" style="width:75%">
+  <img src="../images/create-project-lvl2.png" style="width:75%">
 </p>
 
 
@@ -269,7 +269,7 @@ terraform apply -parallelism=1 tfplan
 ```
 
 
-### Step 7. Commit the changes to Git
+### Step 6. Commit the changes to Git
 Run the following commands that will push the changes made on the configuration files back to the origin Git repository
 ```cmd
 git add .
