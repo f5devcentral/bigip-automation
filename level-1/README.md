@@ -217,8 +217,6 @@ Change the working directory to `tf-level-1`
 cd tf-level-1
 ```
 
-
-
 ### Step 2. Review the provider details
 Open and review the following files to get a better understanding on how the configuration is structured.
  - **provider.tf** on the root directory
@@ -389,6 +387,7 @@ terraform apply -parallelism=1 tfplan
 ### Step 7. Change the configuration
 
 Edit the `app1.tf` file and change the IP Address configured for this service.
+
 Re-run **terrafrom plan** command to create the plan and review the suggested changes.
 
 ```cmd

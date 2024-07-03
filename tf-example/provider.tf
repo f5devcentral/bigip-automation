@@ -8,8 +8,18 @@ terraform {
 }
 
 provider "bigip" {
-    address = "10.1.1.5"
+    address = "10.1.10.215"
     username = "admin"
-    password = "Ingresslab123"
+    password = "Kostas1234"
     alias=  "dmz"
 }
+
+/*
+# How to add multiple providers - example
+provider "bigip" {
+    address = "10.1.20.112"
+    username = "admin"
+    password = "passwordXYZ"
+    alias=  "azure"
+}
+*/
