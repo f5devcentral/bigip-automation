@@ -1,4 +1,4 @@
-# Building an Automation Framework with Terraform and Per-App AS3
+# Per-App AS3 and Terraform 
 
 In this use-case, we'll explore how to automate the configuration of F5 application services using F5's **Per-App AS3** and **Terraform**. We have templetized the AS3 JSON files using Terraform's `templatefile` function and along with the TF `bigip_as3` resource, these templates are encapsulated within a custom module. This module can be invoked from the root directory (`root module`) by supplying necessary variables, such as IP Address, Pool Members, SSL certificates, etc. This streamlined approach enhances the deployment process, making it more manageable and scalable for applications configured through Terraform and AS3.
 
@@ -12,6 +12,18 @@ In this use-case, we'll explore how to automate the configuration of F5 applicat
 - [Use case workflow](#use-case-workflow)
 - [Demo with UDF](#demo-with-udf)
 - [Demo on your local environment](#demo-on-your-local-environment)  
+
+## Use case workflow
+The workflow for this use-case is as follows:
+  - Users create a new Terraform file configuration (`appX.tf`) with the appropriate application variables.
+  - Users execute **terraform plan** and **terraform apply** commands localy. 
+
+Benefits: 
+  - **Ease of use**: All application varialbes are stored in a simple `tf` file. User just add/modifies/removes `tf` files to change the configuration on BIGIP
+  - **Automation**: Automating the creation and management of application services on BIG-IP reduces the manual workload and speeds up the deployment process.
+  - **Consistency**: Terraform ensures that the configuration is applied consistently every time, reducing the risk of manual errors.
+  - **Scalability**: Terraform’s modular approach allows you to manage complex infrastructure by breaking it down into manageable components.
+
 
 ## Code Explanation
 In the following section, we  provide a detailed explanation of the code that forms the foundation of this automation framework. The code is divided into 2 parts. The first part are the custom modules that we create to templatize AS3 declarations and deploy the AS3 resources. For simplicity, we will refer to these as **AS3_Modules**. In our example, we demonstrate the creation of a single module; however, you can expand this to include multiple modules as needed. The second part is the `root module`, which is used to invoke the `AS3_Modules` and manage the creation of the AS3 resources.
@@ -190,27 +202,17 @@ provider "bigip" {
 ```
 
 
-## Use case workflow
-The workflow for this use-case is as follows:
-  - The Terraform code is stored on a specific directory on your local machine.
-  - Users create a new Terraform file configuration (`appX.tf`) with the appropriate application variables.
-  - Users execute **terraform plan** and **terraform apply** commands localy. 
-
-Benefits: 
-  - **Ease of use**: All application varialbes are stored in a simple `tf` file. User just add/modifies/removes `tf` files to change the configuration on BIGIP
-  - **Automation**: Automating the creation and management of application services on BIG-IP reduces the manual workload and speeds up the deployment process.
-  - **Consistency**: Terraform ensures that the configuration is applied consistently every time, reducing the risk of manual errors.
-  - **Scalability**: Terraform’s modular approach allows you to manage complex infrastructure by breaking it down into manageable components.
 
 ## Demo with UDF
 
 ### Prerequisites
-- Deploy the **Oltra** UDF Deployment
-- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
+- Deploy the **Oltra** UDF Deployment. Once provisioned, use the terminal on **VS Code** to run the commands in this demo. You can find **VS Code** under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
 
 ### Step 1. Go to Terrafrom directory
 
-Open the `VS Code` terminal and change the working directory to `tf-level-1`
+Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
+
+Change the working directory to `tf-level-1`
 ```
 cd tf-level-1
 ```
@@ -278,34 +280,6 @@ Re-run **terrafrom plan** command to create the plan and review the suggested ch
 terraform plan -parallelism=1 -refresh=false -out=tfplan
 ```
 
-The output of the above command should be similar to the following
-
-```tf
-Terraform will perform the following actions:
-
-  # module.app1.bigip_as3.as3 will be updated in-place
-  ~ resource "bigip_as3" "as3" {
-      ~ as3_json         = jsonencode(
-          ~ {
-              ~ path_app1     = {
-                  ~ app1      = {
-                      ~ virtualAddresses = [
-                          ~ "10.1.120.41" -> "10.1.120.40",
-                        ]
-                        # (3 unchanged attributes hidden)
-                    }
-                    # (2 unchanged attributes hidden)
-                }
-                # (1 unchanged attribute hidden)
-            }
-        )
-        id               = "prod"
-        # (7 unchanged attributes hidden)
-    }
-
-Plan: 0 to add, 1 to change, 0 to destroy.
-```
-
 To deploy the suggested changes run the following command.
 
 ```cmd
@@ -313,66 +287,14 @@ terraform apply -parallelism=1 "tfplan"
 ```
 
 
-### Step 8. Deleting the configuration
+### Step 8. Delete the configuration
 Deleting of the apps deployed can take place with 2 methods. One method would be to delete the file `app1.tf` and re-run `terraform plan` `terraform apply` commands as demontrasted before or alternatively you can run the `terraform destroy` command to delete all TF configuration.
+
 In our case, we will delete the `app1.tf` file.
 
 ```cmd
 rm app1.tf
 terraform plan -parallelism=1 -refresh=false -out=tfplan
-```
-
-The output of the above command should be similar to the following
-
-```tf
-Terraform will perform the following actions:
-
-  # module.app1.bigip_as3.as3 will be destroyed
-  # (because bigip_as3.as3 is not in configuration)
-  - resource "bigip_as3" "as3" {
-      - application_list = "path_app1" -> null
-      - as3_json         = jsonencode(
-            {
-              - path_app1     = {
-                  - app1      = {
-                      - class            = "Service_HTTP"
-                      - pool             = "pool_app1"
-                      - virtualAddresses = [
-                          - "10.1.120.40",
-                        ]
-                      - virtualPort      = 80
-                    }
-                  - class     = "Application"
-                  - pool_app1 = {
-                      - class   = "Pool"
-                      - members = [
-                          - {
-                              - serverAddresses = [
-                                  - "10.1.20.21",
-                                ]
-                              - servicePort     = 30880
-                              - shareNodes      = true
-                            },
-                        ]
-                    }
-                }
-              - schemaVersion = "3.50.0"
-            }
-        ) -> null
-      - id               = "prod" -> null
-      - ignore_metadata  = true -> null
-      - per_app_mode     = true -> null
-      - task_id          = "f3bced9e-d739-472b-bf1e-6a77fc5691a5" -> null
-      - tenant_filter    = "prod" -> null
-      - tenant_list      = "prod" -> null
-      - tenant_name      = "prod" -> null
-    }
-
-Plan: 0 to add, 0 to change, 1 to destroy.
-
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
-Saved the plan to: tfplan
 ```
 
 To deploy the suggested changes run the following command.
@@ -392,8 +314,6 @@ terraform apply -parallelism=1 "tfplan"
 
 > [!NOTE]
 > The instructions provided for this demo will work on macOS and Linux users. However, for Windows users, keep in mind that modifications might be needed before running the code. 
-
-
 
 ### Step 1. Clone the repo
 
@@ -473,34 +393,6 @@ Re-run **terrafrom plan** command to create the plan and review the suggested ch
 terraform plan -parallelism=1 -refresh=false -out=tfplan
 ```
 
-The output of the above command should be similar to the following
-
-```tf
-Terraform will perform the following actions:
-
-  # module.app1.bigip_as3.as3 will be updated in-place
-  ~ resource "bigip_as3" "as3" {
-      ~ as3_json         = jsonencode(
-          ~ {
-              ~ path_app1     = {
-                  ~ app1      = {
-                      ~ virtualAddresses = [
-                          ~ "10.1.120.41" -> "10.1.120.40",
-                        ]
-                        # (3 unchanged attributes hidden)
-                    }
-                    # (2 unchanged attributes hidden)
-                }
-                # (1 unchanged attribute hidden)
-            }
-        )
-        id               = "prod"
-        # (7 unchanged attributes hidden)
-    }
-
-Plan: 0 to add, 1 to change, 0 to destroy.
-```
-
 To deploy the suggested changes run the following command.
 
 ```cmd
@@ -515,59 +407,6 @@ In our case, we will delete the `app1.tf` file.
 ```cmd
 rm app1.tf
 terraform plan -parallelism=1 -refresh=false -out=tfplan
-```
-
-The output of the above command should be similar to the following
-
-```tf
-Terraform will perform the following actions:
-
-  # module.app1.bigip_as3.as3 will be destroyed
-  # (because bigip_as3.as3 is not in configuration)
-  - resource "bigip_as3" "as3" {
-      - application_list = "path_app1" -> null
-      - as3_json         = jsonencode(
-            {
-              - path_app1     = {
-                  - app1      = {
-                      - class            = "Service_HTTP"
-                      - pool             = "pool_app1"
-                      - virtualAddresses = [
-                          - "10.1.120.40",
-                        ]
-                      - virtualPort      = 80
-                    }
-                  - class     = "Application"
-                  - pool_app1 = {
-                      - class   = "Pool"
-                      - members = [
-                          - {
-                              - serverAddresses = [
-                                  - "10.1.20.21",
-                                ]
-                              - servicePort     = 30880
-                              - shareNodes      = true
-                            },
-                        ]
-                    }
-                }
-              - schemaVersion = "3.50.0"
-            }
-        ) -> null
-      - id               = "prod" -> null
-      - ignore_metadata  = true -> null
-      - per_app_mode     = true -> null
-      - task_id          = "f3bced9e-d739-472b-bf1e-6a77fc5691a5" -> null
-      - tenant_filter    = "prod" -> null
-      - tenant_list      = "prod" -> null
-      - tenant_name      = "prod" -> null
-    }
-
-Plan: 0 to add, 0 to change, 1 to destroy.
-
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
-Saved the plan to: tfplan
 ```
 
 To deploy the suggested changes run the following command.
