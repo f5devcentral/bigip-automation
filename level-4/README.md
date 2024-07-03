@@ -373,3 +373,18 @@ Check that the changes **`app50.tf`** are now pushed to the main repository and 
 </p>
 
 
+### Step 6. Review the pipeline output.
+Go to `Pipelines` and review the execution of the pipeline that run on `main` branch. You should be able to see all the executed pipelines along with commit message as the title for each pipeline. 
+
+Select the pipeline that with the title **Merge branch 'app50' into main**.
+
+<p align="center">
+  <img src="../images/pipelines-lvl4-gitlab.gif" style="width:75%">
+</p>
+
+Click on each stage to see the logs but also the artifacts that the pipeline is creating.
+
+
+> [!NOTE]
+> Notice that the pipeline that runs on Merge Request is different than the pipeline that runs on the `main` branch.
+
