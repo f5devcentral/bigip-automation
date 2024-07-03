@@ -292,14 +292,14 @@ Open `app2.tf` file and select the **Blame** button to see the history of change
 - **Date and Time**: The date and time when the change was made.
 
 <p align="center">
-  <img src="../images/blame-lvl2.png" style="width:75%">
+  <img src="../images/blame-lvl2-gitlab.png" style="width:75%">
 </p>
 
 
 Alternatively you can select the **History** button to see the evolution of the specific file along along with the commit information.
 
 <p align="center">
-  <img src="../images/history-lvl2.png" style="width:75%">
+  <img src="../images/history-lvl2-gitlab.png" style="width:75%">
 </p>
 
 > [!TIP]
