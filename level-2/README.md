@@ -179,12 +179,16 @@ Alternatively you can select the **History** button to see the evolution of the 
 Create a new repository on GitLab and clone it to your local machine.
 ```
 git clone https://gitlab.com/<account>/<repo-name>
+cd <repo-name>
 ```
+
+<p align="center">
+  <img src="../images/create-project.png" style="width:75%">
+</p>
+
 
 Create the necessary files to your **new** repo on GitLab.
 ```
-git clone https://github.com/f5devcentral/bigip-automation
-cd <repo-name>
 mkdir modules
 mkdir modules/as3_http
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/as3.tpl -o modules/as3_http/as3.tpl
@@ -199,7 +203,6 @@ Edit a file called `providers.tf`. Please change the values of `address`, `usern
 
 Commit and push the changes back to GitLab.
 ```
-cd <repo-name>
 git add .
 git commit -m "Initial files"
 git push origin
@@ -256,7 +259,8 @@ git push
 
 ### Step 5. Change the configuration
 
-Edit the `app2.tf` file and change the IP Address configured for this service (10.1.120.42 -> 10.1.120.43).
+Edit the `app2.tf` file and change the IP Address configured for this service (10.1.10.42 -> 10.1.10.43).
+
 Re-run the **terrafrom** commands to plan and apply the changes.
 
 ```cmd
