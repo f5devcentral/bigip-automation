@@ -176,8 +176,8 @@ Click on each stage to see the logs but also the artifacts that the pipeline is 
 
 Create a new repository on GitLab and clone it to your local machine.
 ```
-git clone https://gitlab.com/<account>/<repo-name>
-cd <repo-name>
+git clone https://gitlab.com/<account>/level-4
+cd level-4
 ```
 
 Use this repository to copy the module files to your **new** repo on GitLab.
@@ -216,10 +216,16 @@ Follow the instruction below to create a personal access token.
 1. Enter a name and expiry date for the token.
     - If you do not enter an expiry date, the expiry date is automatically set to 365 days later than the current date.
     - By default, this date can be a maximum of 365 days later than the current date.
-1. Select the desired scopes.
+1. Include the following scopes (api, read_api, read_repository, write_repository, read_registry, write_registry).
 1. Select create personal access token.
 
-Copy your new personal access token and make sure you save it - you won't be able to access it again.
+
+<p align="center">
+  <img src="../images/personal-access-token.png" style="width:75%">
+</p>
+
+> [!IMPORTANT]
+> Copy your new personal access token and make sure you save it - you won't be able to access it again.
 
 
 ### Step 3. Create a GitLab Runner
@@ -248,26 +254,35 @@ docker run -d --name gitlab-runner --restart always \
 
 ### Step 4. Register your GitLab Runner
 
-Log on to **GitLab.com** and go to the repository you have created.
 
-Copy the `registration token` that can be be found under `Setttings`->`CI/CD`->`Runners`.
+Click the button the `New project runner` that can be be found under `Setttings`->`CI/CD`->`Runners`.
 
 <p align="center">
-  <img src="../images/token-lvl3.png" style="width:75%">
+  <img src="../images/new-project-runner.png" style="width:75%">
 </p>
 
-Use the following docker exec command to start the registration process:
+On the following page, add a runner `description`, select the option `run untagged jobs` and press **Create runner**.
+
+<p align="center">
+  <img src="../images/new-project-runner-v2.png" style="width:75%">
+</p>
+
+In the next screen you will see the command that you need to run in order to register you gitlab-runner.
+
+<p align="center">
+  <img src="../images/register-runner.png" style="width:65%">
+</p>
+
+
+Use the following docker exec command to start the registration process. Make sure you add your own token to the command below.
 ```
-docker exec -it gitlab-runner gitlab-runner register
+docker exec -it gitlab-runner gitlab-runner register --url https://gitlab.com --token <add-the-token-you-got-from-gitlab>
 ```
 You will be asked to fill in the following:
 
-- Enter the GitLab instance URL (for example, https://gitlab.com/):
-- Enter the registration token:
-- Enter a description for the runner:
-- Enter tags for the runner (comma-separated): *** Leave Blank ***
-- Enter optional maintenance note for the runner:
-- Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: *** Select docker ***
+- Enter the GitLab instance URL (for example, https://gitlab.com/): **Leave Blank**
+- Enter a description for the runner: **Add the Description for the runner**
+- Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: **Select docker**
 - Enter the default Docker image (for example, ruby:2.7):
 
 Once the registration is complete you should be able to see that the runner under the assigned project runners.
@@ -302,7 +317,6 @@ git push origin
 We will apply the new configuration to a branch instead of commiting the changes directly to `main`. The following command will create a new branch called `app50` if it doesn't already exists and switch to the new branch.
 
 ```cmd
-cd tf-level-4
 git fetch origin && (git checkout app50 || git checkout -b app50)
 ```
 
@@ -342,19 +356,20 @@ git push -u origin HEAD \
 ### Step 5. Login to Git to review the Merge Request.
 
 Log on to **GitLab.com** and go to the repository you have created.
+
 <p align="center">
-  <img src="../images/repo-lvl4.png" style="width:75%">
+  <img src="../images/repo-lvl4-gitlab.png" style="width:75%">
 </p>
 
 Go to the Merge Requests page to review the suggested changes. Once you review the changes and the pipeline results, approve the MR and click `merge`
 
 <p align="center">
-  <img src="../images/merge-lvl4.gif" style="width:75%">
+  <img src="../images/merge-gitlab.gif" style="width:75%">
 </p>
 
 Check that the changes **`app50.tf`** are now pushed to the main repository and branch **app50** has been removed.  
 <p align="center">
-  <img src="../images/repo-lvl4-1.png" style="width:75%">
+  <img src="../images/repo-lvl4-gitlab-2.png" style="width:75%">
 </p>
 
 
