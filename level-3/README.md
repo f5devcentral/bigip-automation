@@ -28,9 +28,9 @@ In `Level-3` we are introducing 2 new elements to enhance the automation framewo
 ## Use case workflow
 The workflow for this use case is as follows:
   1. The Terraform code is stored on a Git platform (GitLab on-prem or cloud).
-  1. Users clone the repository to their local machines. (Terraform is NOT required) 
+  1. Users clone the repository to their local machines.
   1. Users create or make changes to the Terraform files and commit these changes back to the Git repository with appropriate commit messages.
-  1. GitLab triggers a pipeline that runs the Terraform commands automatically.
+  1. GitLab triggers the pipeline that runs the Terraform commands.
 
 **Benefits:**
   - All benefits of `Level-2` use case
@@ -38,7 +38,6 @@ The workflow for this use case is as follows:
   - **Log and Output History**: A comprehensive history of all Terraform logs and outputs is maintained alongside the Git commits, providing an audit trail and facilitating troubleshooting.
   - **Auditability**: Changes are documented through Terraform’s execution plans and logs, providing an audit trail for compliance and troubleshooting purposes.
   
-
 
 ## Code Explanation
 In the following section, we  provide a deeper explanation of how **remote state** is configured as well as details on the **pipeline** configuration.
@@ -249,13 +248,14 @@ apply:
 
 ## Demo with UDF
 
-- Deploy the **Oltra** UDF Deployment
-- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
-
+### Prerequisites
+- Deploy the **Oltra** UDF Deployment. Once provisioned, use the terminal on **VS Code** to run the commands in this demo. You can find **VS Code** under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
 
 ### Step 1. Clone Terraform repository
 
-Open the `VS Code` terminal and clone `tf-level-3` from the internally hosted GitLab.
+Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
+
+Clone `tf-level-3` from the internally hosted GitLab.
 ```
 git clone https://root:Ingresslab123@git.f5k8s.net/bigip/tf-level-3.git
 ```
@@ -313,14 +313,7 @@ Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and sel
 </p>
 
 
-Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
-
-<p align="center">
-  <img src="../images/pipelines-lvl3.png" style="width:60%">
-</p>
-
-
-Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
+Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline. Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
 
 <p align="center">
   <img src="../images/pipelines-lvl3.gif" style="width:80%">
@@ -333,7 +326,7 @@ Navigate through the different stages to review the logs and the artifacts that 
 - Terraform must be installed on your local machine that you will be running the demo. The demo has been tested with Terraform v1.8.1
 - BIGIP running version v15 (or higher)
 - Installed AS3 version on BIGIP should be 3.50 (or higher)
-- GitLab account
+- GitLab.com account
 - Docker that would host GitLab-Runner
 
 > [!NOTE]
@@ -355,7 +348,7 @@ curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/lev
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/main.tf -o modules/as3_http/main.tf
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/.gitignore -o .gitignore
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/providers.tf -o providers.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/providers-lvl3-4.tf -o providers.tf
 ```
 
 Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
@@ -383,7 +376,8 @@ Follow the instruction below to create a personal access token.
 1. Select the desired scopes.
 1. Select create personal access token.
 
-Copy your new personal access token and make sure you save it - you won't be able to access it again.
+> [!IMPORTANT]
+> Copy your new personal access token and make sure you save it - you won't be able to access it again.
 
 
 ### Step 3. Create a GitLab Runner
@@ -405,19 +399,15 @@ docker run -d --name gitlab-runner --restart always \
 ```
 
 > [!NOTE]
-> If the states during the pipleline are getting queued for more than 5-10 seconds then you can improve that by changing the concurrency to **5** in the `config.toml` file. If you are using Ubuntu you can find this file in the following folder `/var/lib/docker/volumes/gitlab-runner-config/_data/` 
+> If the stages during the pipleline execution are getting queued for more than 5-10 seconds then you can improve that by changing the concurrency configuration from **1** to **5** in the `config.toml` file. If you are using Ubuntu you can find this file inside the Docker volume at the following folder `/var/lib/docker/volumes/gitlab-runner-config/_data/` 
 
 ### Step 4. Register your GitLab Runner
 
-Log on to **GitLab.com** and go to the repository you have created.
-Go to `Setttings`->`CI/CD`->`Runners` and under project runners copy the `registration token` as shown on the picture below.
+Copy the `registration token` that can be be found under `Setttings`->`CI/CD`->`Runners`.
 
 <p align="center">
   <img src="../images/token-lvl3.png" style="width:75%">
 </p>
-
-> [!IMPORTANT]
-> Before registering the runner, disable **Instance runners** so that you don't use GitLab-hosted runners.
 
 Use the following docker exec command to start the registration process:
 ```
@@ -433,16 +423,24 @@ You will be asked to fill in the following:
 - Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: *** Select docker ***
 - Enter the default Docker image (for example, ruby:2.7):
 
+Once the registration is complete you should be able to see that the runner under the assigned project runners.
+
+<p align="center">
+  <img src="../images/project-runners.png" style="width:75%">
+</p>
+
+> [!IMPORTANT]
+> Before moving to the next step, disable the **Instance runners** so that you don't use GitLab-hosted runners.
+
 
 ### Step 5. Create the pipeline
 
 Copy the `.gitlab-ci.yml` from the **bigip-automation** repository file to the root directory of your repository.
 
 ```cmd
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-3/.gitlab-ci.yml -o .gitlab-ci.yml
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitlab-ci-lvl3.yml -o .gitlab-ci.yml
 ```
-Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username and GIT_PASSWORD to your personal access token
-
+Edit the `.gitlab-ci.yml` and change the **GIT_USERNAME** to your GitLab username and **GITLAB_ACCESS_TOKEN** to your personal access token
 
 Commit and push the changes back to GitLab. We are adding the word "ignore" on the commit message to avoid triggering the pipeline 
 ```
@@ -451,7 +449,7 @@ git commit -m "Creating Pipeline - ignore -"
 git push origin
 ```
 
-### Step 6. Create a new configuration
+### Step 6. Create new configuration
 Create the configuration to publish a new application and save the file as `app3.tf`.
 
 ```cmd
@@ -477,7 +475,6 @@ git commit -m "Adding application app03"
 git push
 ```
 
-
 ### Step 5. Login to Git to review the pipeline output.
 
 Log on to **GitLab.com** and go to the repository you have created.
@@ -487,14 +484,7 @@ Log on to **GitLab.com** and go to the repository you have created.
 </p>
 
 
-Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline.
-
-<p align="center">
-  <img src="../images/pipelines-lvl3.png" style="width:60%">
-</p>
-
-
-Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
+Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline. Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
 
 <p align="center">
   <img src="../images/pipelines-lvl3.gif" style="width:80%">
