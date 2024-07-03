@@ -407,19 +407,19 @@ On the following page, add a runner `description`, select the option `run untagg
 In the next screen you will see the command that you need to run in order to register you gitlab-runner.
 
 <p align="center">
-  <img src="../images/register-runner.png">
+  <img src="../images/register-runner.png" style="width:65%">
 </p>
 
 
-Use the following docker exec command to start the registration process:
+Use the following docker exec command to start the registration process. Make sure you add your own token to the command below.
 ```
 docker exec -it gitlab-runner gitlab-runner register --url https://gitlab.com --token <add-the-token-you-got-from-gitlab>
 ```
 You will be asked to fill in the following:
 
-- Enter the GitLab instance URL (for example, https://gitlab.com/): *** Leave Blank ***
-- Enter a description for the runner: *** Add the Description for the runner ***
-- Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: *** Select docker ***
+- Enter the GitLab instance URL (for example, https://gitlab.com/): **Leave Blank**
+- Enter a description for the runner: **Add the Description for the runner**
+- Enter an executor: custom, shell, ssh, parallels, docker-windows, docker-autoscaler, virtualbox, docker, docker+machine, kubernetes, instance: **Select docker**
 - Enter the default Docker image (for example, ruby:2.7):
 
 Once the registration is complete you should be able to see that the runner under the assigned project runners.
