@@ -208,14 +208,20 @@ provider "bigip" {
 ### Prerequisites
 - Deploy the **Oltra** UDF Deployment. Once provisioned, use the terminal on **VS Code** to run the commands in this demo. You can find **VS Code** under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
 
-### Step 1. Go to Terrafrom directory
+
+### Step 1. Clone Terraform repository
 
 Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
 
-Change the working directory to `tf-level-1` 
+Clone `tf-level-1` from the internally hosted GitLab and change the working directory to `tf-level-1` 
 ```
+git clone https://root:Ingresslab123@git.f5k8s.net/bigip/tf-level-1.git
 cd tf-level-1
 ```
+
+>[!NOTE]
+> We are including the username/password for Git during the cloning process so that we don't have to input the credentials when we push the changes back to the origin server.
+
 
 ### Step 2. Review the provider details
 Open and review the following files to get a better understanding on how the configuration is structured.
