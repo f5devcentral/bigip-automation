@@ -19,6 +19,7 @@ In all previous scenarios (levels) there was primarily a single user that was us
 - [Code Explanation](#code-explanation)
   - [Pipeline](#pipeline)
 - [Demo with UDF](#demo-with-udf)
+- [Demo on your local environment](#demo-on-your-local-environment)
 
 
 ## Use case workflow
@@ -45,20 +46,21 @@ In the following section, we  provide a deeper explanation of the **pipeline** c
 
 ### *Pipeline*
 
-The only difference between this pipeline and the one in `Level-3` is that this pipeline run 1 of the 3 stages during the Merge Request (MR). This stage is `plan`, so that the reviewer can easier see what will the changes be before accepting the MR. 
+The only difference between this pipeline and the one in `Level-3` is that this pipeline run 1 of the 2 stages during the Merge Request (MR). This stage is `plan`, so that the reviewer can easier see what will the changes be before accepting the MR. 
 
-You can find the entire pipeline <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/level-4/.gitlab-ci.yml"> here </a>
+You can find the entire pipeline <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitlab-ci-lvl4.yml"> here </a>
 
 
 ## Demo with UDF
 
-#### Prerequisites
-- Deploy the **Oltra** UDF Deployment
-- Use the terminal on **VS Code** to run the commands. **VS Code** is under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.*
+### Prerequisites
+- Deploy the **Oltra** UDF Deployment. Once provisioned, use the terminal on **VS Code** to run the commands in this demo. You can find **VS Code** under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
 
 ### Step 1. Clone Terraform repository
 
-Go to VS Code command line and clone `tf-level-4` from the internally hosted GitLab. 
+Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
+
+Clone `tf-level-4` from the internally hosted GitLab.
 
 ```cmd
 git clone https://udf:Ingresslab123@git.f5k8s.net/bigip/tf-level-4.git
@@ -164,7 +166,7 @@ Click on each stage to see the logs but also the artifacts that the pipeline is 
 ### Prerequisites
 - BIGIP running version v15 (or higher)
 - Installed AS3 (v3.50 or higher) on BIGIP 
-- GitLab account
+- GitLab.com account
 - Docker that would host GitLab-Runner
 
 > [!NOTE]
@@ -186,7 +188,7 @@ curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/fil
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/main.tf -o modules/as3_http/main.tf
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/modules/as3_http/variables.tf -o modules/as3_http/variables.tf
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitignore -o .gitignore
-curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/providers-lvl3-4.tf -o providers-lvl3-4.tf
+curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/providers-lvl3-4.tf -o providers.tf
 ```
 
 Edit a file called `providers.tf`. Please change the values of `address`, `username` and `password` according to your environment.
@@ -285,7 +287,7 @@ Copy the `.gitlab-ci.yml` from the **bigip-automation** repository file to the r
 ```cmd
 curl -s https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/files/.gitlab-ci-lvl4.yml -o .gitlab-ci.yml
 ```
-Edit the `.gitlab-ci.yml` and change the GIT_USERNAME to your GitLab username and GIT_PASSWORD to your personal access token
+Edit the `.gitlab-ci.yml` and change the **GIT_USERNAME** to your GitLab username and **GITLAB_ACCESS_TOKEN** to your personal access token
 
 
 Commit and push the changes back to GitLab. We are adding the word "ignore" on the commit message to avoid triggering the pipeline 
@@ -304,8 +306,8 @@ cd tf-level-4
 git fetch origin && (git checkout app50 || git checkout -b app50)
 ```
 
-### Step 7. Create a new configuration
-Create the configuration to publish a new application and save the file as `app3.tf`.
+### Step 7. Create new configuration
+Create the configuration to publish a new application and save the file as `app50.tf`.
 
 ```cmd
 cat <<EOF > app50.tf

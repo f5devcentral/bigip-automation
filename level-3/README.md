@@ -76,19 +76,19 @@ terraform init \
 ```
 
 ### *Pipeline*
-In this section we provide an overview of the pipeline configuration and how it works. We will be breaking up the pipeline, but you can find the entire pipeline <a href="https://github.com/f5devcentral/bigip-automation/blob/main/level-3/.gitlab-ci.yml"> here </a>
+In this section we provide an overview of the pipeline configuration and how it works. We will be breaking up the pipeline, but you can find the entire pipeline <a href="https://github.com/f5devcentral/bigip-automation/blob/main/files/.gitlab-ci-lvl3.yml"> here </a>
 
 #### Workflow
 The pipeline is triggered based on specific conditions:
 
-- It will not trigger if the commit message ends with `-draft`.
+- It will not trigger if the commit message contains `ignore`.
 - It will always trigger for `merge request` events.
 - It will trigger for commits to the `main` branch.
 
 ```yml
 workflow:  
     rules:
-      - if: $CI_COMMIT_MESSAGE =~ /draft$/
+      - if: $CI_COMMIT_MESSAGE =~ /ignore/
         when: never
       - if: $CI_COMMIT_BRANCH == "main"
         when: always
@@ -97,22 +97,21 @@ workflow:
 #### Variables
 The pipeline defines several variables:
 
-**TF_DIR**: Directory containing Terraform files.
 **STATE_NAME**: Name of the Terraform state used in the terraform init command.
 **ADDRESS**: URL for the remote Terraform state in GitLab.
-**TF_USERNAME**: Terraform username, provided via environment variable.
+**GIT_USERNAME**: GIT username, provided via environment variable.
+**GITLAB_ACCESS_TOKEN**: GIT personal access token, provided via environment variable.
 
 ```yml
 variables:
-  TF_DIR: ${CI_PROJECT_DIR}
-  STATE_NAME: "tf_state_lvl_2"
-  ADDRESS: "https://git.f5k8s.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
-  TF_USERNAME: $tf_user
+  STATE_NAME: "tf_state_lvl_3"
+  ADDRESS: "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
+  GIT_USERNAME: "<<<change with Gitlab username>>>"
+  GITLAB_ACCESS_TOKEN: "<<<change with Gitlab personal-access-token>>>"
 ```
 #### Stages & Image
-The pipeline consists of three stages but you can change them according to your requirements:
+The pipeline consists of two stages but you can change them according to your requirements:
 
-- Validation
 - Plan
 - Apply
 
@@ -121,7 +120,6 @@ The Docker image used was `skenderidis/ansible-runner:terraform` but you can cha
 ```yml
 # Stages of the pipeline
 stages:
-  - validation
   - plan
   - apply
 
@@ -129,18 +127,6 @@ stages:
 image:
   name: skenderidis/ansible-runner:terraform
   entrypoint: [""]
-```
-
-
-#### Validation Stage
-Typically the validation stage is customer specific in order to verify the configuration based on their requirements, so in this demo we have left it without any configuration.
-```yml
-verify:
-  stage: validation
-  script:
-    - echo "ok"
-  only:
-    - main
 ```
 
 #### Plan Stage
@@ -161,8 +147,6 @@ plan:
   script:
     # Initialize variables and get terraform version for troubleshooting
     - terraform --version
-    - export GITLAB_ACCESS_TOKEN=$tf_access_token
-    - echo $GITLAB_ACCESS_TOKEN
     - cd ${TF_DIR}            # To get inside the working directory
     # To initiate terraform backend / gitlab managed terraform state
     - |
@@ -170,7 +154,7 @@ plan:
       -backend-config=address=${ADDRESS} \
       -backend-config=lock_address=${ADDRESS}/lock \
       -backend-config=unlock_address=${ADDRESS}/lock \
-      -backend-config=username=${TF_USERNAME} \
+      -backend-config=username=${GIT_USERNAME} \
       -backend-config=password=${GITLAB_ACCESS_TOKEN} \
       -backend-config=lock_method=POST \
       -backend-config=unlock_method=DELETE \
@@ -221,8 +205,6 @@ apply:
   script:
     # Initialize variables and get terraform version for troubleshooting
     - terraform --version
-    - export GITLAB_ACCESS_TOKEN=$tf_access_token
-    - echo $GITLAB_ACCESS_TOKEN
     - cd ${TF_DIR}            # To get inside the working directory
     # To initiate terraform backend / gitlab managed terraform state
     - |
@@ -230,7 +212,7 @@ apply:
       -backend-config=address=${ADDRESS} \
       -backend-config=lock_address=${ADDRESS}/lock \
       -backend-config=unlock_address=${ADDRESS}/lock \
-      -backend-config=username=${TF_USERNAME} \
+      -backend-config=username=${GIT_USERNAME} \
       -backend-config=password=${GITLAB_ACCESS_TOKEN} \
       -backend-config=lock_method=POST \
       -backend-config=unlock_method=DELETE \
