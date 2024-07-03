@@ -357,8 +357,13 @@ Follow the instruction below to create a personal access token.
 1. Enter a name and expiry date for the token.
     - If you do not enter an expiry date, the expiry date is automatically set to 365 days later than the current date.
     - By default, this date can be a maximum of 365 days later than the current date.
-1. Select the desired scopes.
+1. Include the following scopes (api, read_api, read_repository, write_repository, read_registry, write_registry).
 1. Select create personal access token.
+
+
+<p align="center">
+  <img src="../images/personal-access-token.png" style="width:75%">
+</p>
 
 > [!IMPORTANT]
 > Copy your new personal access token and make sure you save it - you won't be able to access it again.
