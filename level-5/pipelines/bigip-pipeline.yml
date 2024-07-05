@@ -1,0 +1,144 @@
+---
+# Pipeline will only trigger when something is pushed to main branch 
+workflow:  
+    rules:
+      - if: $CI_COMMIT_MESSAGE =~ /ignore/
+        when: never     
+      - when: always
+
+# List of variables
+variables:
+  ADDRESS: "https://git.f5k8s.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/"
+  git_username: "<< put your own username >>"
+  git_access_token: "<< put your own access token >>"
+
+
+# Stages of the pipeline
+stages:
+  - plan
+  - apply
+
+# Image which will use in each stage
+image:
+  name: skenderidis/ansible-runner:terraform
+  entrypoint: [""]
+
+
+# To check the TF plan for any changes on the BIGIP Virtual Servers
+verify-on-merge:
+  stage: plan
+  script:
+    # The next lines removes the suffix "-draft" from repo name to assign it as the TF state
+    - terraform --version
+    - |
+      state_temp=${CI_COMMIT_REF_NAME}
+      state=${state_temp%-draft}
+    - cd ${CI_PROJECT_DIR}           # To get inside the working directory
+    - pwd
+    - ls -la
+    # To initiate terraform backend / gitlab managed terraform state
+    - |
+      terraform init \
+      -backend-config=address=${ADDRESS}/${state} \
+      -backend-config=lock_address=${ADDRESS}/${state}/lock \
+      -backend-config=unlock_address=${ADDRESS}/${state}/lock \
+      -backend-config=username=${git_username} \
+      -backend-config=password=${git_access_token} \
+      -backend-config=lock_method=POST \
+      -backend-config=unlock_method=DELETE \
+      -backend-config=retry_wait_min=5
+
+    - mkdir tf_details # create a folder to be saved as an artifact at the end of the stage
+    - terraform plan -parallelism=1 -refresh=false -out=tfplan
+
+    # save changes (add/update/delete) as artifact.
+    - terraform show -no-color -json tfplan | jq -r 'try .resource_changes[] | select(.change.actions[0]=="update")' > tf_details/update.json
+    - terraform show -no-color -json tfplan | jq -r 'try .resource_changes[] | select(.change.actions[0]=="create")' > tf_details/create.json
+    - terraform show -no-color -json tfplan | jq -r 'try .resource_changes[] | select(.change.actions[0]=="delete")' > tf_details/delete.json
+
+    #verify the files (artifacts) created
+    - ls -l tf_details
+
+  artifacts:
+    paths:
+      - tfplan
+      - tf_details
+      - as3
+  only:
+    - merge_requests      
+
+
+plan:
+  stage: plan
+  script:
+    # Initialize variables and get terraform version for troubleshooting
+    - terraform --version
+    - |
+      state_temp=${CI_COMMIT_REF_NAME}
+      state=${state_temp%-draft}
+    - cd ${CI_PROJECT_DIR}           # To get inside the working directory
+    - pwd
+    - ls -la
+    # To initiate terraform backend / gitlab managed terraform state
+    - |
+      terraform init \
+      -backend-config=address=${ADDRESS}/${state} \
+      -backend-config=lock_address=${ADDRESS}/${state}/lock \
+      -backend-config=unlock_address=${ADDRESS}/${state}/lock \
+      -backend-config=username=${git_username} \
+      -backend-config=password=${git_access_token} \
+      -backend-config=lock_method=POST \
+      -backend-config=unlock_method=DELETE \
+      -backend-config=retry_wait_min=5
+
+    - mkdir tf_details # create a folder to be saved as an artifact at the end of the stage
+    - terraform plan -parallelism=1 -refresh=false -out=tfplan
+
+    # save changes (add/update/delete) as artifact.
+    - terraform show -no-color -json tfplan | jq -r 'try .resource_changes[] | select(.change.actions[0]=="update")' > tf_details/update.json
+    - terraform show -no-color -json tfplan | jq -r 'try .resource_changes[] | select(.change.actions[0]=="create")' > tf_details/create.json
+    - terraform show -no-color -json tfplan | jq -r 'try .resource_changes[] | select(.change.actions[0]=="delete")' > tf_details/delete.json
+
+    #verify the files (artifacts) created
+    - ls -l tf_details
+
+  artifacts:
+    paths:
+      - tfplan
+      - tf_details
+  except:
+    - /^.*draft.*$/
+    - merge_requests     
+
+
+# To apply the TF plan for any changes on the BIGIP Virtual Servers
+apply:
+  stage: apply
+  script:
+    # Initialize variables and get terraform version for troubleshooting
+    - terraform --version
+    - |
+      state_temp=${CI_COMMIT_REF_NAME}
+      state=${state_temp%-draft}    
+    - cd ${CI_PROJECT_DIR}            # To get inside the working directory
+    # To initiate terraform backend / gitlab managed terraform state
+    - |
+      terraform init \
+      -backend-config=address=${ADDRESS}/${state} \
+      -backend-config=lock_address=${ADDRESS}/${state}/lock \
+      -backend-config=unlock_address=${ADDRESS}/${state}/lock \
+      -backend-config=username=${git_username} \
+      -backend-config=password=${git_access_token} \
+      -backend-config=lock_method=POST \
+      -backend-config=unlock_method=DELETE \
+      -backend-config=retry_wait_min=5    
+
+    # Apply the changes
+    - terraform apply -parallelism=1 "tfplan"
+
+  dependencies:              
+    - plan
+  except:
+    - /^.*draft.*$/
+    - merge_requests
+

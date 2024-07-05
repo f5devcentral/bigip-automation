@@ -7,7 +7,6 @@ In `Level-5`, we enhance the automation framework to enable customers or teams t
 
 # Table of Contexts
 
-
 - [Use case workflow](#use-case-workflow)
 - [Code Explanation](#code-explanation)
   - [Pipeline](#pipeline)
@@ -30,8 +29,6 @@ The workflow for this use-case is as follows:
 
 ## Code Explanation
 
-In the following section, we  provide a deeper explanation of how **remote state** is configured as well as details on the **pipeline** configuration.
-
 ### User configuration files (YAML)
 To enhance usability, users only need to define the parameters of the service they intend to publish and save them in a YAML file format. YAML was selected for its user-friendly interface, which is both intuitive and familiar to DevOps users. Alternatively, customers may opt to utilize a ServiceNow ticket or a REST-API/web form, enabling their users to input the required information seamlessly. An example of the YAML parameters is shown below 
 
@@ -41,15 +38,14 @@ To enhance usability, users only need to define the parameters of the service th
 name: app01
 partition: prod
 location: dmz
+comments: This is a new web server for testing
 type: http
 virtual_server:
-  vip: 10.1.4.52
+  ip: 10.1.10.152
   port: 80
-pool_members:
-  - ip: 10.10.10.11
-    port: 80
-  - ip: 10.10.10.12
-    port: 80
+members:
+  - ip: 10.1.20.21
+    port: 30880
 ```
 
 ### Converting YAML to AS3 and TF configuration
@@ -60,10 +56,10 @@ Once the user defines the configuration they want to apply in the YAML file, thi
 To streamline the conversion of YAML to AS3 and TF, we leverage JINJA2 templates. These templates dynamically incorporate input from YAML file(s) as variables, facilitating the generation of the final AS3 JSON and TF config files. This seamless integration occurs within the CI/CD pipeline framework and is orchestrated through an Ansible playbook for efficiency and the resulting AS3/TF configurations are being stored in the downstream (BIG-IP) repository. 
 
 <p align="center">
-  <img src="images/templates.png" style="width:85%">
+  <img src="../images/templates.png" style="width:85%">
 </p>
 
-Below you can find the ansible playbook that we are using to achieve the transformation
+Below you can find the ansible playbook that we are using to achieve the transformation. The ansible **templates** and **playbook** can be found on the folders `Jinja2` and `Ansible`.  
 ```yml
 - name: Create AS3 configurations
   hosts: localhost
@@ -81,40 +77,22 @@ Below you can find the ansible playbook that we are using to achieve the transfo
 ```
 
 ### User Repositories and pipeline
-Each customer creates their configuration files in YAML format on their repository. When a new file isadded, modified, or deleted, the pipeline is triggered, proceeding through the following stages:
+Each customer creates their configuration files in YAML format on their repository. When a new file is added, modified, or deleted, the pipeline is triggered, proceeding through the following stages:
 
   - **Template Conversion**: This is the first stage that utilizes JINJA2 templates to translate the YAML files into corresponding AS3 declarations and TF configuration. The resultant output is stored in two distinct directories, **tf** and **as3**, and passed on to the next stage as an artifact.
   - **GIT**: In this second and final stage, the pipeline pushes the files residing in the as3 and tf directories to the upstream repository that is the source of truth for BIG-IP configuration.
 
-
-<p align="center">
-  <img src="images/user-pipeline.png" style="width:85%">
-</p>
-
-The pipeline configuration for the user repos can be found on the following [**file**](user-pipeline.yml)
-
+The pipeline configuration for the User reposistories can be found under the `Pipelines` folder.
 
 
 ### BIGIP Repositories and pipeline
-The BIG-IP repositories serve as repositories for AS3 declaration and TF files generated from the YAML specifications. They act as the definitive source of truth for configuring all F5 BIG-IP pair and facilitate version-controlled management. While our example employs a single BIG-IP, the use-case can be adapted to utilize either one repository per BIG-IP or one branch per BIG-IP.
+The BIG-IP repositories serve as repositories for AS3 declaration and TF files generated from the YAML specifications. They act as the definitive source of truth for configuring **F5 BIG-IP** and facilitate version-controlled management. While our example employs a single BIG-IP, the use-case can be adapted utilizing the `providers.tf` to have multiple BIGIP devices.
 
-Changes to the BIG-IP repositories are exclusively propagated from the upstream (customer) repositories. When a modification occurs in a customer repository, the "user-pipeline" converts the YAML specification into AS3 and stores the new configuration in a dedicated branch on the BIG-IP repository.
+Each customer is assigned 2 branches on **BIGIP** repository. The first branch that is named after the customer's repository is the primary branch for each customer while the second branch is a temporary branch that customers will push their changes for their upstream repository. 
 
-Within the BIG-IP repository, we've implemented two pipelines:
-
-  - **Merge Pipeline**. This pipeline is designed to prevent the merging of code that could potentially fail upon deployment to BIG-IP. Therefore, the pipeline must succeed before allowing administrators to merge the branch to the main branch. To mitigate the risk of failures in AS3 configurations, the pipeline executes a "dry-run" against the BIG-IP (or a UAT environment) to ensure that the final pipeline will consistently succeed post-merger. 
-    > Note: Per-App dry-run configuration has been removed as a bug was identified. Once it is fixed, we will include the "dry-run" configuration.
-
-  - **AS3 Pipeline**. The purpose of the this pipeline, is to identify the new AS3 declarations and push them down to the corresponding BIGIP. The pipeline is split in 3 stages
-    - **Changes Detection**: This initial stage identifies AS3 declarations that have been added, modified, or deleted. The filenames are recorded for subsequent processing in later stages.
-    - **Update**: In the final stage, the pipeline adds or removes the AS3 declarations from the respective BIG-IP devices, ensuring consistent configuration across the infrastructure.
- 
-<p align="center">
-  <img src="images/bigip-pipeline.png" style="width:65%">
-</p>
+Within the BIG-IP repository, we've implemented a pipeline very similar to  `Level-4`. The pipeline configuration for the BIGIP reposistories can be found under the `Pipelines` folder.
 
 The pipeline configuration for the bigip repos can be found on the following [**file**](https://github.com/f5emea/oltra/use-cases/automation/bigip/pipelines/bigip-pipeline.yml)
-
 
 
 ## Demo with UDF
@@ -181,7 +159,7 @@ Go to the BIGIP repository and and select the Merge Requests (MR). You should se
 Once you have reviewed the MR, you should then approve the Merge Request. Once approved, the changes should be pushed to the **Branch** that holds the configuration for `team-a` and the **Final** pipeline should start. 
 
 <p align="center">
-  <img src="../images/step-5-lvl-5.gif" style="width:75%">
+  <img src="../images/step-5-lvl-5.png" style="width:75%">
 </p>
 
 

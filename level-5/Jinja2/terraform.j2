@@ -1,0 +1,5 @@
+resource "bigip_as3" "{{name}}" {
+  as3_json = file("as3/{{name}}.json")
+  tenant_name = "{{partition}}"
+  provider = bigip.{{location}}
+}

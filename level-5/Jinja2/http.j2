@@ -1,0 +1,42 @@
+{
+    "schemaVersion": "3.50.1",  
+    "path-{{name}}": {
+        "class": "Application",
+        "{{name}}": {
+            "class": "Service_HTTP",
+            "virtualAddresses": [
+                "{{virtual_server.ip}}"
+            ],
+            {% if port is defined %}
+                "virtualPort": {{virtual_server.port}},
+            {%- endif %}
+            "pool": "pool-{{name}}"
+        },    
+        "pool-{{name}}": {
+            "class": "Pool",
+            {% if monitor is defined -%}
+                "monitors": [
+                {% if monitor == "tcp" -%}
+                "tcp"
+                {% elif monitor == "http" -%}
+                "http"
+                {%- endif %}       
+            ],{%- endif %}
+            "members": [
+                {% for entry in members -%}
+                    {
+                    "servicePort": {{entry.port}},
+                    "shareNodes": true,
+                    {% if entry.ratio is defined %}
+                    "ratio": {{entry.ratio}},
+                    {%- endif %}
+                    {% if entry.connectionlimit is defined %}
+                    "connectionLimit": {{entry.connectionlimit}},
+                    {%- endif %}
+                    "serverAddresses": ["{{entry.ip}}"]
+                    }{{ "," if not loop.last }}
+                {% endfor -%}
+          ]}
+
+  }
+}
