@@ -215,7 +215,7 @@ Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
 
 Clone `tf-level-1` from the internally hosted GitLab and change the working directory to `tf-level-1` 
 ```
-git clone https://root:Ingresslab123@git.f5k8s.net/bigip/tf-level-1.git
+git clone https://root:Ingresslab123@git.f5k8s.net/automation/tf-level-1.git
 cd tf-level-1
 ```
 

@@ -63,7 +63,7 @@ Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
 Clone `tf-level-4` from the internally hosted GitLab.
 
 ```cmd
-git clone https://udf:Ingresslab123@git.f5k8s.net/bigip/tf-level-4.git
+git clone https://udf:Ingresslab123@git.f5k8s.net/automation/tf-level-4.git
 ```
 
 > [!NOTE]
