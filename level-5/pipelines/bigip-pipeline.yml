@@ -8,9 +8,9 @@ workflow:
 
 # List of variables
 variables:
-  ADDRESS: "https://git.f5k8s.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/"
-  git_username: "<< put your own username >>"
-  git_access_token: "<< put your own access token >>"
+  ADDRESS: "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/"
+  git_username: "<< Add-your-username >>"
+  git_access_token: "<< Add-your-access-token >>"
 
 
 # Stages of the pipeline
@@ -28,7 +28,7 @@ image:
 verify-on-merge:
   stage: plan
   script:
-    # The next lines removes the suffix "-draft" from repo name to assign it as the TF state
+    # Initialize variables and get terraform version for troubleshooting
     - terraform --version
     - |
       state_temp=${CI_COMMIT_REF_NAME}

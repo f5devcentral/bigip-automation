@@ -1,0 +1,145 @@
+workflow:  
+    rules:
+      - if: $CI_COMMIT_MESSAGE =~ /ignore/
+        when: never
+      - if: $CI_COMMIT_BRANCH == "main"
+        when: always
+      - when: never
+
+variables:
+  upstream_repo: "<< Add-your-own-bigip-repo --- for example --->  gitlab.com/f5emea/bigip.git>>"
+  git_username: "<< Add-your-username >>"
+  git_access_token: "<< Add-your-access-token >>"
+  git_email: "Add-your-own email example@gmail.com"
+  git_name: "John Doe"
+
+  
+default:
+  image: skenderidis/ansible-runner
+
+stages:
+  - Templates
+  - Update
+
+
+
+Create AS3 and TF:
+  stage: Templates
+  tags:
+    - shared  
+  script:
+    - echo Commit-ID $CI_COMMIT_SHA
+    - echo ProjectName $CI_PROJECT_NAME
+    - git diff --stat $CI_COMMIT_SHA^ $CI_COMMIT_SHA
+      # create a folder to be saved as an artifact at the end of the stage
+    - mkdir as3
+    - mkdir tf
+      # create a temporary folder to hold the templates that will be used to convert the JINJA2 templates
+    - mkdir templates
+      # download the http JINJA2 template
+    - curl -o templates/http.j2 -s https://git.f5k8s.net/automation/automation_files/-/raw/main/templates/http.j2 
+    - curl -o templates/tf.j2 -s https://git.f5k8s.net/automation/automation_files/-/raw/main/templates/tf.j2 
+      # Get all files that end with .yaml
+    - yaml_files=$(find . -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" \))   
+      # The next part will verify that the name of the file (app01.yaml) matches the name attribute in the YAML file (name: app01) and add them to the list
+    - |
+      echo -n "" > file_list.txt
+        # Iterate over each YAML file
+      for file in $yaml_files; do
+          filename=$(basename -- "$file")
+          filename_no_extension="${filename%.*}"
+          # Extract the value associated with the 'name' key from the YAML file using yq
+          name_value=$(yq eval '.name' "$file")
+          # Check if the extracted name matches the filename without the extension
+          if [ "$name_value" == "$filename_no_extension" ]; then
+              echo "Adding filename "$filename_no_extension".yaml to the list for processing."
+              echo "$filename" >> file_list.txt
+          else
+              echo "Mismatch!!! $filename has the 'name' key configured as $name_value. Please correct it."
+              echo "Exiting the pipeline."
+              exit 1 
+          fi
+      done
+      # download the ansible playbook that will be used to convert the YAML files to AS3
+    - curl -o create-per-app-as3.yml -s https://git.f5k8s.net/automation/automation_files/-/raw/main/create-per-app-as3.yml 
+       # Check if the "file_list.txt" has less 1 or more files in order to bypass the templating script
+    - app_files=$(wc -l < file_list.txt)
+    - |
+      if [ $app_files -ge 1 ]; then
+        # Go into a loop for every added file and save the output to as3 folder.
+        while IFS= read -r line; do
+        # Read and output lines ending with ".yml" or ".yaml"
+          echo "Running Ansible playbook for $line". # display the file that the Ansible playbook is running
+          ansible-playbook -e @$line -e partition=$CI_PROJECT_NAME create-per-app-as3.yml
+        done < "file_list.txt"
+      else
+        echo "There are no added files in the directory. Skipping rest of the stage."
+      fi
+  only:
+    - main
+  artifacts:
+    paths:
+      - as3/
+      - tf/
+
+
+Push to BIGIP Repo:
+  stage: Update
+#  needs: ["Push to WAF Repo"]
+  tags:
+    - shared  
+  script:
+    - ls -la as3/
+    - ls -la tf/
+    - files_added=$(ls -1 as3 | wc -l)
+    - echo "The number of files in the as3 directory is $files_added"
+    # clone bigip repo
+    - git clone https://${git_username}:${git_access_token}@${upstream_repo}
+    - cd bigip
+    - |
+      exists=$(git ls-remote --heads origin ${CI_PROJECT_NAME}-draft)
+      echo $exists
+      # If the branch exists
+      if [ -n "$exists" ]; then
+        echo "${CI_PROJECT_NAME}-draft branch exists"
+        git branch -a  # List all branches
+        git switch ${CI_PROJECT_NAME}-draft  # Switch to the ${CI_PROJECT_NAME}-draft branch
+        git pull origin ${CI_PROJECT_NAME}-draft  # Pull the latest changes for ${CI_PROJECT_NAME}-draft branch
+      else
+        echo "${CI_PROJECT_NAME}-draft branch does NOT exist"
+        git branch -a  # List all branches
+        git fetch origin  # Ensure you have the latest information from the remote repository
+        git checkout -b ${CI_PROJECT_NAME}-draft origin/${CI_PROJECT_NAME}  # Create and switch to the ${CI_PROJECT_NAME}-draft branch based on the remote source-branch
+      fi      
+    -  git config --global user.email ${git_email}
+    -  git config --global user.name ${git_name}
+        
+      # Remove all existing AS3 declarations except provider.tf and .gitignore
+    - rm -R -f as3/*
+    - |
+      find . -maxdepth 1 -type f ! -name 'provider.tf' ! -name '.gitignore' -print0 | xargs -0 -r rm --
+    - |
+      if [ $files_added -ge 1 ]; then
+        # Copy ALL existing AS3 declarations. 
+        mkdir -p as3
+        cp ../as3/* as3/
+        cp ../tf/* .
+      fi
+
+    # Git Message and Commit
+    -  git add .
+    - |
+      if ! git diff-index --quiet HEAD; then
+        git commit -m "JobID ($CI_JOB_ID) on PipelineID($CI_PIPELINE_ID) Added $files_added file(s) and Deleted $files_deleted file(s)"
+        git push -u origin HEAD \
+          -o merge_request.create \
+          -o merge_request.title="New Merge Request $(git branch --show-current)" \
+          -o merge_request.description="This MR was create by the pipeline on repository $CI_PROJECT_NAME" \
+          -o merge_request.target=$CI_PROJECT_NAME \
+          -o merge_request.remove_source_branch \
+          -o merge_request.squash
+      fi    
+  only:
+    - main
+
+
