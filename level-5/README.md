@@ -11,6 +11,7 @@ In `Level-5`, we enhance the automation framework to enable customers or teams t
 - [Code Explanation](#code-explanation)
   - [Pipeline](#pipeline)
 - [Demo with UDF](#demo-with-udf)
+- [Demo on your local environment](#demo-on-your-local-environment)
 
 ## Use case workflow
 The workflow for this use-case is as follows:
