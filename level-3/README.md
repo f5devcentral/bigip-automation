@@ -21,7 +21,7 @@ In `Level-3` we are introducing 2 new elements to enhance the automation framewo
 - [Code Explanation](#code-explanation)
   - [Remote State](#remote-state)
   - [Pipeline](#pipeline)
-- [Demo with UDF](#demo)
+- [Demo](#demo)
 
 ## Use case workflow
 The workflow for this use case is as follows:
