@@ -10,8 +10,7 @@ In this use-case, we'll explore how to automate the configuration of F5 applicat
   - [AS3_Modules](#as3_modules)
   - [Root Module](#root-module)
 - [Use case workflow](#use-case-workflow)
-- [Demo with UDF](#demo-with-udf)
-- [Demo on your local environment](#demo-on-your-local-environment)  
+- [Demo](#demo)
 
 ## Use case workflow
 The workflow for this use-case is as follows:
@@ -201,9 +200,9 @@ provider "bigip" {
 }
 ```
 
-
-
 ## Demo with UDF
+> [!IMPORTANT]
+> To run this Demo on your local environment, switch to the `Main` branch
 
 ### Prerequisites
 - Deploy the **Oltra** UDF Deployment. Once provisioned, use the terminal on **VS Code** to run the commands in this demo. You can find **VS Code** under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
@@ -296,119 +295,6 @@ terraform apply -parallelism=1 "tfplan"
 ### Step 8. Delete the configuration
 Deleting of the apps deployed can take place with 2 methods. One method would be to delete the file `app1.tf` and re-run `terraform plan` `terraform apply` commands as demontrasted before or alternatively you can run the `terraform destroy` command to delete all TF configuration.
 
-In our case, we will delete the `app1.tf` file.
-
-```cmd
-rm app1.tf
-terraform plan -parallelism=1 -refresh=false -out=tfplan
-```
-
-To deploy the suggested changes run the following command.
-
-```cmd
-terraform apply -parallelism=1 "tfplan"
-```
-
-## Demo on your local environment
-
-
-### Prerequisites
-- Terraform must be installed on your local machine that you will be running the demo. The demo has been tested with Terraform v1.8.1
-- BIGIP running version v15 (or higher)
-- Installed AS3 version on BIGIP should be 3.50 (or higher)
-
-
-> [!NOTE]
-> The instructions provided for this demo will work on macOS and Linux users. However, for Windows users, keep in mind that modifications might be needed before running the code. 
-
-### Step 1. Clone the repo
-
-On your terminal clone the current repository.
-```
-git clone https://github.com/f5devcentral/bigip-automation
-```
-
-Change directory to `level-1`
-```
-cd bigip-automation/level-1
-```
-
-### Step 2. Modify the files
-
-Change the values within the files to reflect your local environment.
-
-On the **provider.tf** file change the following: 
-- `address` to the IP of your BIGIP device.
-- `username` to an admin account from your BIGIP device.
-- `password` for the admin account that you selected.
-
-
-### Step 3. Create a new configuration
-Create the configuration to publish the new application and save it as a file called `app1.tf`.
-Please change the values of `virtualIP`, `serverAddresses` and `servicePort` according to your environment.
-
-```cmd
-cat <<EOF > app1.tf
-module "app1" {
-    source              = "./modules/as3_http"
-    name                = "app1"
-    virtualIP           = "10.1.10.41"
-    serverAddresses     = ["10.1.20.21"]
-    servicePort         = 30880
-    partition           = "prod"
-    providers = {
-      bigip = bigip.dmz
-    }    
-}
-EOF
-```
-
-### Step 4. Terraform init
-Initialize Terraform on the working directory, to download the necessary provider plugins (BIGIP) and setup the modules and backend for storing your infrastructure's state
-
-```cmd
-terraform init
-```
-
-### Step 5. Terraform plan
-
-Run the **terraform plan** command to create a plan consisting of a set of changes that will make your resources match your configuration. 
-
-```cmd
-terraform plan -parallelism=1 -refresh=false -out=tfplan
-```
-
-> [!NOTE]
-> Review the actions Terraform would take to modify your infrastructure before moving to the next step.
-
-
-### Step 6. Terraform apply
-
-Run the **terraform apply** command to deploy the changes identified from the `plan` stage.
-
-```cmd
-terraform apply -parallelism=1 tfplan
-```
-
-### Step 7. Change the configuration
-
-Edit the `app1.tf` file and change the IP Address configured for this service.
-
-Re-run **terrafrom plan** command to create the plan and review the suggested changes.
-
-```cmd
-terraform plan -parallelism=1 -refresh=false -out=tfplan
-```
-
-To deploy the suggested changes run the following command.
-
-```cmd
-terraform apply -parallelism=1 "tfplan"
-```
-
-
-### Step 8. Deleting the configuration
-Deleting of the apps deployed can take place with 2 methods. One method would be to delete the file `app1.tf` and re-run `terraform plan` `terraform apply` commands as demontrasted before or alternatively you can run the `terraform destroy` command to delete all TF configuration.
 In our case, we will delete the `app1.tf` file.
 
 ```cmd
