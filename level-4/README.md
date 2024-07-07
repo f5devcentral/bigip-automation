@@ -155,10 +155,3 @@ Click on each stage to see the logs but also the artifacts that the pipeline is 
 
 > [!NOTE]
 > Notice that the pipeline that runs on Merge Request is different than the pipeline that runs on the `main` branch.
-
-
-
-
-> [!NOTE]
-> Notice that the pipeline that runs on Merge Request is different than the pipeline that runs on the `main` branch.
-
