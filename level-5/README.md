@@ -129,7 +129,7 @@ type: http
 virtual_server:
   ip: 10.1.10.152
   port: 80
-pool_members:
+members:
   - ip: 10.10.10.11
     port: 80
   - ip: 10.10.10.12
