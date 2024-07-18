@@ -200,7 +200,7 @@ provider "bigip" {
 }
 ```
 
-## Demo with UDF
+## Demo
 > [!IMPORTANT]
 > To run this Demo on your local environment, switch to the `Main` branch
 
