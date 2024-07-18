@@ -40,8 +40,6 @@ Benefits:
 
 ### Step 1. Clone Terraform repository
 
-Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
-
 Clone `tf-level-2` from the internally hosted GitLab.
 ```
 git clone https://root:Ingresslab123@git.f5k8s.net/automation/tf-level-2.git
