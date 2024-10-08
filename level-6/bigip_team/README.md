@@ -18,27 +18,49 @@ The Service Owner workflow for updating Schemas is:
 ### Step 1. Create Service definition in JsonSchema format
 
 ```md
+
 {
     "$id": "https://example.com/service.schema.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "title": "LITTLE_LOAD_BALANCER",                                    #<---- `title` is unique identifier of the Service in NetOrca
-    "metadata": {                                                       #<---- `metadata` is a place where Service Owner can put any information about the Service
-      "monthly_cost": 100,                                              #<---- one of NetOrca features is Charging API
+    "title": "LOAD_BALANCER",                                       # <---- `title` is unique identifier of the Service in NetOrca
+    "metadata": {                                                   #<---- one of NetOrca features is Charging API
+      "monthly_cost": 100,
       "cost_per_change": 500
     },
     "properties": {
-      "name": {                                                         #<---- `name` is the only required property in the Service definition
+      "name": {                                                     #<---- `name` is the only required property in the Service definition
         "type": "string",
-        "pattern": "^([a-z]{1}[a-z0-9-]{1,60})$",                       #<---- jsonschema offers powerful validation capabilities like enums, regex, lists, objects in objects etc
+        "pattern": "^([a-z]{1}[a-z0-9-]{1,60})$",                   #<---- jsonschema offers powerful validation capabilities like enums, regex, lists, objects in objects etc
         "examples": [
           "app01",
           "webserver01"
         ]
       },
+      "partition": {
+        "type": "string",
+        "enum": ["prod", "dev", "sit", "uat", "qa"],
+        "examples": [
+          "prod",
+          "dev"
+        ]
+      },
+      "location": {
+        "type": "string",
+        "examples": [
+          "dmz",
+          "internal"
+        ]
+      },
+      "comments": {
+        "type": "string",
+        "examples": [
+          "This is a new web server for testing"
+        ]
+      },
       "type": {
         "type": "string",
-        "enum": ["http", "https", "tcp"],                               
+        "enum": ["http", "https", "tcp"],
         "examples": [
           "http",
           "https"
@@ -50,7 +72,7 @@ The Service Owner workflow for updating Schemas is:
         "properties": {
           "ip": {
             "type": "string",
-            "format": "ipv4",
+            "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
             "examples": [
               "10.1.10.152"
             ]
@@ -63,23 +85,51 @@ The Service Owner workflow for updating Schemas is:
             ]
           }
         }
+      },
+      "members": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["ip", "port"],
+          "properties": {
+            "ip": {
+              "type": "string",
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "examples": [
+                "10.1.20.21",
+                "10.1.20.22"
+              ]
+            },
+            "port": {
+              "type": "integer",
+              "examples": [
+                30880,
+                30881
+              ]
+            }
+          }
+        }
       }
     },
     "required": [
       "name",
+      "partition",
+      "location",
       "type",
       "virtual_server",
+      "members"
     ],
     "description": "New load balancer on F5 BigIP"
   }
-  
+
+
 ```
 
 
 ### Step 2. Create README.md file with explanation of the Service and example usage
 
 ```md
-# Little Load Balancer Service
+# Load Balancer Service
 
 BigIP Load Balancer service
 
@@ -89,7 +139,12 @@ BigIP Load Balancer service
 - **name**: The name of the load balancer (string).
   - Must follow the pattern `^([a-z]{1}[a-z0-9-]{1,60})$`.
   - Examples: `app01`, `webserver01`.
-
+  
+- **partition**: The environment in which the load balancer resides.
+  - Enum: `prod`, `dev`, `sit`, `uat`, `qa`.
+  
+- **location**: The network location, such as `dmz` or `internal`.
+  
 - **type**: The protocol type of the load balancer.
   - Enum: `http`, `https`, `tcp`.
 
@@ -97,6 +152,12 @@ BigIP Load Balancer service
   - Fields:
     - `ip`: IPv4 address of the virtual server.
     - `port`: Port number for the virtual server.
+
+- **members**: A list of IP addresses and ports for backend servers (array).
+  - Each member has:
+    - `ip`: IPv4 address of the backend server.
+    - `port`: Port number for the backend server.
+
 
 ## Example Usage
 
@@ -109,12 +170,18 @@ The following is an example configuration in YAML format that aligns with the JS
 
 application1:
   services:
-    LITTLE_LOAD_BALANCER:
-      - name: load-balancer1
+    LOAD_BALANCER:
+      - name: load_balancer1
+        partition: prod
+        location: dmz
+        comments: This is a new web server for testing
         type: http
         virtual_server:
           ip: 10.1.10.152
           port: 80
+        members:
+        - ip: 10.1.20.21
+          port: 30880
 ```
 
 
