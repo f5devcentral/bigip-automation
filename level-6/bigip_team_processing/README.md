@@ -3,6 +3,8 @@
 Service Owner teams are responsible for creating and maintaining their Services in NetOrca, as detailed in [BIGIP_TEAM](../bigip_team/README.md).  
 Another key responsibility is to manage requests in the form of Change Instances submitted by Customers. Service Owners must establish a workflow for processing these Change Instances in their queue.
 
+The example repository with the ansible/terraform files explained in this README is located here: https://gitlab.com/netorca_public/bigip-automation/bigip-team-automation
+
 ## Definitions
 - **Service**: A well-defined piece of infrastructure that the Service Owner Team offers to Customers. It is defined using a JsonSchema and processed as part of the infrastructure implementation. Examples include Web Servers, Load Balancers, and Firewalls.
   
