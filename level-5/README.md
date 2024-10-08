@@ -10,8 +10,7 @@ In `Level-5`, we enhance the automation framework to enable customers or teams t
 - [Use case workflow](#use-case-workflow)
 - [Code Explanation](#code-explanation)
   - [Pipeline](#pipeline)
-- [Demo with UDF](#demo-with-udf)
-- [Demo on your local environment](#demo-on-your-local-environment)
+- [Demo](#demo)
 
 ## Use case workflow
 The workflow for this use-case is as follows:
@@ -102,84 +101,9 @@ Within the BIG-IP repository, we've implemented a pipeline very similar to  `Lev
 The pipeline configuration for the bigip repos can be found on the following [**file**](https://github.com/f5emea/oltra/use-cases/automation/bigip/pipelines/bigip-pipeline.yml)
 
 
-## Demo with UDF
-
-### Step 1. Review the repositories
-Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.
-
-Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and review the 4 repositories that will be used in the use case.
-
-- `customer-a` and `customer-b` are the two repos that are used to save the highlevel VirtualServer configuration in a YAML format.
-- `bigip` is the repository that holds all the AS3 JSON files that serve as the source of truth for the BIG-IP. For simplicity, the configuration for each customer is stored on a separate branch 
-- `automation_files` is the repo that holds all the pipelines, Ansible playbooks and JINJA2 templates
-
-<p align="center">
-  <img src="../images/step-1-lvl-5.gif.gif" style="width:75%">
-</p>
-
-### Step 2. Create the YAML file with the required key value pairs
-
-We will create a new file on `customer-a` repository called **`app01.yaml`** and the file will contain the following configuration
-
-```yaml
-name: app01
-partition: prod
-location: dmz
-type: http
-virtual_server:
-  ip: 10.1.10.152
-  port: 80
-pool_members:
-  - ip: 10.10.10.11
-    port: 80
-  - ip: 10.10.10.12
-    port: 80
-```
-
-<p align="center">
-  <img src="../images/step-2-lvl-5.gif" style="width:75%">
-</p>
-
-### Step 3. Review the pipeline stages on `customer-a` repository
-
-Select "Pipelines" on the left side of the GitLab page and review the pipeline that was just executed from your latest commit
-
-<p align="center">
-  <img src="../images/step-3-lvl-5.gif" style="width:75%">
-</p>
-
-
-### Step 4. Review the Merge Request on BIGIP repo
-
-Go to the BIGIP repository and and select the Merge Requests (MR). You should see a MR from `customer-a`. Open the MR and Navigate through the different tabs/pages going through the **Pipeline**, **Commits** and **Changes**.
-
-<p align="center">
-  <img src="../images/step-4-lvl-5.gif" style="width:75%">
-</p>
-
-> Notice that there is a new **Temporary** Branch that has been created for the change, called `customer-a-draft`. This should be deleted when the MR is approved.
-
-
-### Step 5. Approve the Merge Request
-
-Once you have reviewed the MR, you should then approve the Merge Request. Once approved, the changes should be pushed to the **Branch** that holds the configuration for `customer-a` and the **Final** pipeline should start. 
-
-<p align="center">
-  <img src="../images/step-5-lvl-5.png" style="width:75%">
-</p>
-
-
-### Step 6. Review Pipeline outcome
-
-Once the MR is approved, the pipeline should run **Terraform plan/apply** in order to push the configuration to BIGIP. Please review the pipeline steps going through the logs and artifacts.
-
-<p align="center">
-  <img src="../images/step-6-lvl-5.gif" style="width:75%">
-</p>
-
-
-
-## Demo on your local environment
+## Demo
+> [!IMPORTANT]
+> To run this Demo on the UDF environment, switch to the `UDF` branch
 
 ### Prerequisites
 - BIGIP running version v15 (or higher)

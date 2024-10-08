@@ -21,9 +21,7 @@ In `Level-3` we are introducing 2 new elements to enhance the automation framewo
 - [Code Explanation](#code-explanation)
   - [Remote State](#remote-state)
   - [Pipeline](#pipeline)
-- [Demo with UDF](#demo-with-udf)
-- [Demo on your local environment](#demo-on-your-local-environment)
-
+- [Demo](#demo)
 
 ## Use case workflow
 The workflow for this use case is as follows:
@@ -228,87 +226,15 @@ apply:
     - main
 ```
 
-## Demo with UDF
-
-### Prerequisites
-- Deploy the **Oltra** UDF Deployment. Once provisioned, use the terminal on **VS Code** to run the commands in this demo. You can find **VS Code** under the `bigip-01` on the `Access` drop-down menu.  Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/vscode.png"> here </a> to see how.
-
-### Step 1. Clone Terraform repository
-
-Provision **Oltra** UDF Deployment and open the `VS Code` terminal.
-
-Clone `tf-level-3` from the internally hosted GitLab.
-```
-git clone https://root:Ingresslab123@git.f5k8s.net/automation/tf-level-3.git
-```
-
-
-### Step 2. Go to Terrafrom directory
-
-Change the working directory to `tf-level-3`
-```
-cd tf-level-3
-```
-
-### Step 3. Create a new configuration
-Create the configuration to publish a new application and save the file as `app3.tf`.
-
-```cmd
-cat <<EOF > app3.tf
-module "app3" {
-    source              = "./modules/as3_http"
-    name                = "app3"
-    virtualIP           = "10.1.10.44"
-    serverAddresses     = ["10.1.20.21"]
-    servicePort         = 30880
-    partition           = "prod"
-    providers = {
-      bigip = bigip.dmz
-    }    
-}
-EOF
-```
-
-### Step 4. Commit the changes to Git
-Add you details on Git so that any changes you make will include your name. This will make it easier in the future to identify who made the change.
-
-```cmd
-git config user.name "John Doe"
-git config user.email "j.doe@f5.com"
-```
-
-Run the following commands that will push the changes made on the configuration files back to the origin Git repository
-```cmd
-git add .
-git commit -m "Adding application app03"
-git push
-```
-
-### Step 5. Login to Git to review the pipeline output.
-
-Access the web interface **GitLab** that is under the `bigip-01` on the `Access` drop-down menu. Click <a href="https://raw.githubusercontent.com/f5devcentral/bigip-automation/main/images/gitlab.png"> here </a> to see how.
-
-Log on to GitLab using the root credentials (**root**/**Ingresslab123**) and select the repository `bigip / tf_level_3`. 
-
-<p align="center">
-  <img src="../images/repo-lvl3.gif" style="width:80%">
-</p>
-
-
-Go to `Pipelines` and review the execution of the lastest pipeline. You should be able to see all the executed pipelines along with commit message as the title for each pipeline. Navigate through the different stages to review the logs and the artifacts that have been saved during the pipeline.
-
-<p align="center">
-  <img src="../images/pipelines-lvl3.gif" style="width:80%">
-</p>
-
-
-## Demo on your local environment
+## Demo
+> [!IMPORTANT]
+> To run this Demo on the UDF environment, switch to the `UDF` branch
 
 ### Prerequisites
 - BIGIP running version v15 (or higher)
 - Installed AS3 (v3.50 or higher) on BIGIP 
 - GitLab.com account
-- Docker that would host GitLab-Runner
+- Docker that will run GitLab-Runner
 
 > [!NOTE]
 > The instructions provided for this demo will work on macOS and Linux users. However, for Windows users, keep in mind that modifications might be needed before running the code. 
