@@ -13,7 +13,7 @@ The Service Owner workflow for updating Schemas is:
 2. Create merge request to main, build will run validation check and report any issues
 3. Merge, build will submit updated schema to NetOrca
 
-![level-6-so](../../images/level6_so.gif)
+<img src="../../images/level6_so.gif" alt="level-6-so" width="1000">
 
 ## Service Owner flow
 ### Step 1. Create Service definition in JsonSchema format
