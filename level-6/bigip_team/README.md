@@ -24,7 +24,7 @@ The Service Owner workflow for updating Schemas is:
     "$id": "https://example.com/service.schema.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "title": "LITTLE_LOAD_BALANCER",                                    #<---- `title` is unique identifier of the Service in NetOrca
+    "title": "LOAD_BALANCER",                                    #<---- `title` is unique identifier of the Service in NetOrca
     "metadata": {                                                       #<---- `metadata` is a place where Service Owner can put any information about the Service
       "monthly_cost": 100,                                              #<---- one of NetOrca features is Charging
       "cost_per_change": 500
