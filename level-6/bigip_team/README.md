@@ -33,54 +33,77 @@ This JSONSchema would be added to the .netorca folder of the Service Owners repo
   <summary>***Click to show JSONSchema example***</summary>
 
   ```json
-  {
-      "$id": "https://example.com/service.schema.json",
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "type": "object",
-      "title": "LITTLE_LOAD_BALANCER",
-      "metadata": {
-        "monthly_cost": 100,
-        "cost_per_change": 500
+  
+{
+    "$id": "https://example.com/service.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "title": "LOAD_BALANCER",                                    #<---- `title` is unique identifier of the Service in NetOrca
+    "metadata": {                                                       #<---- `metadata` is a place where Service Owner can put any information about the Service
+      "monthly_cost": 100,                                              #<---- one of NetOrca features is Charging
+      "cost_per_change": 500
+    },
+    "properties": {
+      "name": {                                                     #<---- `name` is the only required property in the Service definition
+        "type": "string",
+        "pattern": "^([a-z]{1}[a-z0-9-]{1,60})$",                   #<---- jsonschema offers powerful validation capabilities like enums, regex, lists, objects in objects etc
+        "examples": [
+          "app01",
+          "webserver01"
+        ]
       },
-      "properties": {
-        "name": {
-          "type": "string",
-          "pattern": "^([a-z]{1}[a-z0-9-]{1,60})$",
-          "examples": [
-            "app01",
-            "webserver01"
-          ]
-        },
-        "partition": {
-          "type": "string",
-          "enum": ["prod", "dev", "sit", "uat", "qa"],
-          "examples": [
-            "prod",
-            "dev"
-          ]
-        },
-        "location": {
-          "type": "string",
-          "examples": [
-            "dmz",
-            "internal"
-          ]
-        },
-        "comments": {
-          "type": "string",
-          "examples": [
-            "This is a new web server for testing"
-          ]
-        },
-        "type": {
-          "type": "string",
-          "enum": ["http", "https", "tcp"],
-          "examples": [
-            "http",
-            "https"
-          ]
-        },
-        "virtual_server": {
+      "partition": {
+        "type": "string",
+        "enum": ["prod", "dev", "sit", "uat", "qa"],
+        "examples": [
+          "prod",
+          "dev"
+        ]
+      },
+      "location": {
+        "type": "string",
+        "examples": [
+          "dmz",
+          "internal"
+        ]
+      },
+      "comments": {
+        "type": "string",
+        "examples": [
+          "This is a new web server for testing"
+        ]
+      },
+      "type": {
+        "type": "string",
+        "enum": ["http", "https", "tcp"],
+        "examples": [
+          "http",
+          "https"
+        ]
+      },
+      "virtual_server": {
+        "type": "object",
+        "required": ["ip", "port"],
+        "properties": {
+          "ip": {
+            "type": "string",
+            "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+            "examples": [
+              "10.1.10.152"
+            ]
+          },
+          "port": {
+            "type": "integer",
+            "examples": [
+              80,
+              443
+            ]
+          }
+        }
+      },
+      "members": {
+        "type": "array",
+        "items": {
           "type": "object",
           "required": ["ip", "port"],
           "properties": {
@@ -88,53 +111,33 @@ This JSONSchema would be added to the .netorca folder of the Service Owners repo
               "type": "string",
               "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
               "examples": [
-                "10.1.10.152"
+                "10.1.20.21",
+                "10.1.20.22"
               ]
             },
             "port": {
               "type": "integer",
               "examples": [
-                80,
-                443
+                30880,
+                30881
               ]
             }
           }
-        },
-        "members": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["ip", "port"],
-            "properties": {
-              "ip": {
-                "type": "string",
-                "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-                "examples": [
-                  "10.1.20.21",
-                  "10.1.20.22"
-                ]
-              },
-              "port": {
-                "type": "integer",
-                "examples": [
-                  30880,
-                  30881
-                ]
-              }
-            }
-          }
         }
-      },
-      "required": [
-        "name",
-        "partition",
-        "location",
-        "type",
-        "virtual_server",
-        "members"
-      ],
-      "description": "New load balancer on F5 BigIP"
+      }
+    },
+    "required": [
+      "name",
+      "partition",
+      "location",
+      "type",
+      "virtual_server",
+      "members"
+    ],
+    "description": "New load balancer on F5 BigIP"
   }
+
+
 ```
 </details>
 
