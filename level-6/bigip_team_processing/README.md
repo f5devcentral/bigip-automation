@@ -1,9 +1,6 @@
 # Overview
 Service Owner teams are responsible for creating and maintaining their Services in NetOrca. This is covered in [BIGIP_TEAM](../bigip_team/README.md).<br>
-Another responsibility of Service Owners is to process requests submitted by customers. Service Owners need to establish a workflow for processing Change Instances that come in to their queue.
-
-
-
+Another responsibility of Service Owners is to process requests  in the form of Change Instances that are submitted by Customers. Service Owners need to establish a workflow for processing Change Instances that come in to their queue.
 
 
 ## Definitions
@@ -14,7 +11,8 @@ Another responsibility of Service Owners is to process requests submitted by cus
 
 ## Processing Change Instances
 Change Instances are processed by Service Owner team according to the workflow defined by them. NetOrca workflow is implemented as a series of state transitions of Change Instances. 
-Changes can be processed manually (via GUI) or programatically (via API). It's up to Service Owner how processing of the Change Instances will be implemented. We highly encourage using automation-first approach and implementing processing of the Change Instances with API. This streamlines the workflow and makes it more reliable and easier to manage.
+Changes can be processed manually (via GUI) or programmatically (via API). It's up to Service Owner how processing of the Change Instances will be implemented. 
+We highly encourage using automation-first approach and implementing processing of the Change Instances with API. This streamlines the workflow and makes it more reliable and easier to manage.
 
 ### Service Owners - General Processing of Changes
 
