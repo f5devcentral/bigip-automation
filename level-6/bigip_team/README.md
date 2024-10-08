@@ -1,7 +1,8 @@
 # Overview
+
 Service Owners are responsible for creating and maintaining Service definitions that they offer via NetOrca.<br>
 Services are defined in JsonSchema format which are then stored in GitLab repository.<br>
-All changes to the Service definitions are done via GitLab repository and submitted to NetOrca via CICD pipeline.
+All changes to the Service definitions are done via GitLab repository and submitted to NetOrca via a standardised CICD pipeline.
 
 
 ### Service Owners - Schema Updates
@@ -12,7 +13,7 @@ The Service Owner workflow for updating Schemas is:
 2. Create merge request to main, build will run validation check and report any issues
 3. Merge, build will submit updated schema to NetOrca
 
-![level-6-so](../../images/level6_so.gif)
+<img src="../../images/level6_so.gif" alt="level-6-so" width="1000">
 
 ## Service Owner flow
 ### Step 1. Create Service definition in JsonSchema format
@@ -23,9 +24,9 @@ The Service Owner workflow for updating Schemas is:
     "$id": "https://example.com/service.schema.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "title": "LOAD_BALANCER",                                       # <---- `title` is unique identifier of the Service in NetOrca
-    "metadata": {                                                   #<---- one of NetOrca features is Charging API
-      "monthly_cost": 100,
+    "title": "LITTLE_LOAD_BALANCER",                                    #<---- `title` is unique identifier of the Service in NetOrca
+    "metadata": {                                                       #<---- `metadata` is a place where Service Owner can put any information about the Service
+      "monthly_cost": 100,                                              #<---- one of NetOrca features is Charging
       "cost_per_change": 500
     },
     "properties": {

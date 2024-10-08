@@ -1,30 +1,28 @@
+
 # Overview
 
-This guide provides a step-by-step overview of how to interact with NetOrca as a Customer in declarative/GitOps mode.<br>
-This setup requires property setup GitLab repository with CICD pipeline and NetOrca configuration.<br>
-The GitOps approach allows for a more transparent and collaborative process. It also allows further protections and auditng when this is used in highly secure or regulated enterprise environments. 
+This guide outlines how to interact with NetOrca in declarative/GitOps mode as a Customer. It requires a properly configured GitLab repository with a CI/CD pipeline and NetOrca integration. The GitOps model promotes transparency and collaboration, making it ideal for highly secure or regulated environments by enabling robust auditing and additional protections.
 
-Benefits of using GitOps mode:
-- Merge Request process allows team to review changes before they are submitted
-- All changes are versioned and visible in the GitLab repository
-- Changes are easily auditable and trackable
-- Repository serves as a single source of truth for all changes of a Team
+## Benefits of using GitOps mode:
+- The Merge Request process allows teams to review changes before submission.
+- All changes are version-controlled and visible in the GitLab repository.
+- Changes are auditable and easily trackable.
+- The repository serves as the single source of truth for the team's changes.
 
 Repository used in this example:
-https://gitlab.com/netorca_public/bigip-automation/level-6/customer-a 
+[NetOrca Public Repository](https://gitlab.com/netorca_public/bigip-automation/level-6/customer-a)
 
+## Declarative / GitOps Workflow
 
-## Declarative / GitOps workflow
+The customer workflow in declarative/GitOps mode follows these steps:
+- Create a declaration for the Service in their Git repository.
+- Create a merge request. The CI/CD pipeline will validate the declaration and report any errors for correction.
+- Merge the declaration into the main branch. The CI/CD process will push it to NetOrca.
+- In NetOrca, view the change instances. When they are marked as complete, the configuration has been deployed to the infrastructure.
 
-The customer (NetOrca Consumer) workflow is as follows:
-- Create a declaration for the Service in their Git Repo
-- Create a merge request, the CI/CD process will show any validation errors that require correction
-- Merge that to main, the CI/CD process will push it to NetOrca
-- On NetOrca view the change instances, when they are marked complete the config has been deployed to the infrastructure
+<img src="../../images/level6_consumer.gif" alt="level-6-consumer" width="1000">
 
-![level-6-consumer](../../images/level6_consumer.gif)
-
-### LOAD_BALANCER yaml format
+### LOAD_BALANCER YAML Format
 
 ```yaml
 ---
@@ -42,71 +40,65 @@ application1:
           ip: 10.1.10.152
           port: 80
         members:
-        - ip: 10.1.20.21
-          port: 30880
-
+          - ip: 10.1.20.21
+            port: 30880
 ```
-
-
-
 
 ## Demo Walkthrough
 
-### Step 1. Go to NetOrca Service Catalog, find a Service you want to request and get the example YAML definition.
+### Step 1: Go to the NetOrca Service Catalog, find the Service you want to request, and obtain the example YAML definition.
 
-> Service Catalogue is the place where you can find details for all the Services offered via NetOrca.
+> The Service Catalogue contains details for all Services offered via NetOrca.
 > There are 3 tabs in the Service Catalogue:
-> - **README** - information about the Service provided by the Service Owner
-> - **Schema** - detailed JsonSchema definition of the Service - you can look up the details for each property
-> - **Example** - generator of yaml/json code for the Service
+> - **README**: Information about the Service provided by the Service Owner.
+> - **Schema**: A detailed JsonSchema definition of the Service, where you can find details for each property.
+> - **Example**: A generator for YAML/JSON code for the Service.
 
 ![step-1](../../images/level6_demo_customer_step1.gif)
 
-### Step 2. Create service definition either by copying README example or using Submission Builder.
+### Step 2: Define the service by either copying the README example or using the Submission Builder.
 
-#### Step 2.1 Using README example
+#### Step 2.1: Using the README example
 
 ![step-2-1](../../images/level6_demo_customer_step2_1.gif)
 
-#### Step 2.2 Using Submission Builder
+#### Step 2.2: Using the Submission Builder
 
 ![step-2-2](../../images/level6_demo_customer_step2_2.gif)
 
+### Step 3: Request the service via your Customer A GitLab repository.
 
-### Step 3; request it via your Customer A GitLab repository.
+> - In this step, you will create a new branch, modify the example, create a merge request, and watch the pipeline for validation.
+> - Your requests will be sent to NetOrca and validated against the Service definition.
 
-> - In this step you will create a new branch, modify the example, create a merge request and watch the pipeline to pass.
-> - Your requests will be sent to NetOrca and validated against Service definition.
+#### Step 3.1: Validation successful
 
-
-#### Step 3.1 Validation successful
-
-> - Once the pipeline is green, this indicates that the request is valid and can be merged to main branch.
+> - Once the pipeline is green, this indicates that the request is valid and can be merged to the main branch.
 
 ![step-2](../../images/level6_demo_customer_step3_1.gif)
 
-#### Step 3.2. Validation failed
+#### Step 3.2: Validation failed
 
-> - In case of validation failure, you will see the error message in the pipeline logs. This log will show you one or many validation errors that have occurred along with a description of the error. 
+> - If validation fails, the pipeline logs will display detailed error messages. These logs will identify the specific validation errors and provide descriptions to help with correction.
 > - You will need to fix the request and update the merge request.
 
 ![step-2-1](../../images/level6_demo_customer_step3_2.gif)
 
-### Step 4. Merge MR (Merge Request) into the main branch and watch the CI/CD pipeline to run.
+### Step 4: Merge the MR (Merge Request) into the main branch and monitor the CI/CD pipeline.
 
-> - After MR is merged, the Submission job will be triggered and changes will be pushed to NetOrca.
-> - NetOrca will determine the type of change (CREATE/DELETE/MODIFY) for each Service Item and create a corresponding Change Instance. If a Service Item's yaml is unchanged NetOrca will not create any Change Instances (it is declarative)
+> - After the MR is merged, the submission job will be triggered and changes will be pushed to NetOrca.
+> - NetOrca will determine the type of change (CREATE, MODIFY, DELETE) for each Service Item and create a corresponding Change Instance. If the Service Item's YAML is unchanged, no Change Instance will be created, as NetOrca operates in a declarative manner.
 
-#### Step 4.1. CREATE Change Instance
+#### Step 4.1: CREATE Change Instance
 ![step-3](../../images/level6_demo_customer_step4_1.gif)
 
-#### Step 4.2. MODIFY Change Instance
+#### Step 4.2: MODIFY Change Instance
 ![step-3-2](../../images/level6_demo_customer_step4_2.gif)
 
-#### Step 4.3. DELETE Change Instance
+#### Step 4.3: DELETE Change Instance
 ![step-3-3](../../images/level6_demo_customer_step4_3.gif)
 
-### Step 5. Check status of your requests live in NetOrca GUI.
+### Step 5: Check the status of your requests live in the NetOrca GUI.
 
 > - At this stage, the responsibility for processing the customer request shifts to the Service Owner.
 > - By default, the Change Instance will be in a PENDING state, awaiting approval from the Service Owner.
@@ -116,18 +108,9 @@ application1:
 
 ![step-4](../../images/level6_demo_customer_step5.gif)
 
+### Step 6: Repeat this process to maintain your Service Item throughout its lifecycle.
 
-### Step 6. Repeat to maintain you Service Item throughout it's lifecycle
+This process supports modification and deletion by default.
 
-This process supports modification and deletion by default. 
-
-To perform a MODIFICATION: 
-- Change the required field of any Service  Items yaml declaration. 
-- Merge Request, check validation, then merge to main. 
-- This will resubmit to NetOrca, which will determine the changes and create a MODIFY Change Instance for processing.
-
-To perform a DELETE:
-- Delete the particular Service Items yaml from the application file in your repository. 
-- Merge request, check validation then merge to main. 
-- This will submit to NetOrca which will create a DELETE Change Instance for that Service Item.
-- This will be processed and the Service Item will go into the DECOMISSIONED state once that is completed. 
+- **MODIFY**: To modify a Service Item, change the required fields in the YAML declaration. Create a merge request, check validation, then merge to main. This will resubmit to NetOrca, which will create a MODIFY Change Instance for processing.
+- **DELETE**: To delete a Service Item, remove the corresponding YAML from the application file. Create a merge request, check validation, then merge to main. NetOrca will create a DELETE Change Instance, and once processed, the Service Item will move to the DECOMMISSIONED state.

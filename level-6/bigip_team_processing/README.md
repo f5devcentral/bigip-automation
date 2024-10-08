@@ -1,116 +1,102 @@
+
 # Overview
-Service Owner teams are responsible for creating and maintaining their Services in NetOrca. This is covered in [BIGIP_TEAM](../bigip_team/README.md).<br>
-Another responsibility of Service Owners is to process requests submitted by customers. Service Owners need to establish a workflow for processing Change Instances that come in to their queue.
-
-
-
-
+Service Owner teams are responsible for creating and maintaining their Services in NetOrca, as detailed in [BIGIP_TEAM](../bigip_team/README.md).  
+Another key responsibility is to manage requests in the form of Change Instances submitted by Customers. Service Owners must establish a workflow for processing these Change Instances in their queue.
 
 ## Definitions
-- **Service** is well-defined piece of infrastructure that Service Owner Team offers to the Customers. Service Owner team defines the Service in a form of JsonSchema and is responsible for further processing of the infrastructure implementation. Examples: Web Server, Load Balancer, Firewall, etc.
-- **Service Item** is an instance of a Service that is requested by a Customer. It is described by a Service Item name and a set of parameters defined in the Service JsonSchema. Service Item stores an actual state of Customer request.
-- **Change Instance** is a change that is applied to a Service Item by a Customer. Customer can generate CREATE, MODIFY or DELETE Change Instances. Change Instances are reviewed and APPROVED/REJECTED/COMPLETED by Service Owner. APPROVED Change instances are processed by Service Owner team and effectively implemented as pieces of infrastructure.
+- **Service**: A well-defined piece of infrastructure that the Service Owner Team offers to Customers. It is defined using a JsonSchema and processed as part of the infrastructure implementation. Examples include Web Servers, Load Balancers, and Firewalls.
+  
+- **Service Item**: An instance of a Service requested by a Customer, characterized by a name and a set of parameters defined in the Service JsonSchema. It reflects the current state of a Customer request.
 
+- **Change Instance**: A modification requested by a Customer to a Service Item. Change Instances can represent CREATE, MODIFY, or DELETE operations. They are reviewed and either APPROVED, REJECTED, or COMPLETED by the Service Owner. Approved Change Instances are implemented as infrastructure.
 
 ## Processing Change Instances
-Change Instances are processed by Service Owner team according to the workflow defined by them. NetOrca workflow is implemented as a series of state transitions of Change Instances. 
-Changes can be processed manually (via GUI) or programatically (via API). It's up to Service Owner how processing of the Change Instances will be implemented. We highly encourage using automation-first approach and implementing processing of the Change Instances with API. This streamlines the workflow and makes it more reliable and easier to manage.
+Change Instances are handled according to a workflow defined by the Service Owner. NetOrca supports workflows through state transitions of Change Instances, which can be processed manually via the GUI or programmatically via the API. We recommend using an automation-first approach with the API to enhance reliability and streamline workflows.
 
-### Service Owners - General Processing of Changes
+### General Workflow for Service Owners
 
-Customer requested changes will be published on NetOrca in the form of Change Instances for the particular service.
+Customers submit changes to Services as Change Instances on NetOrca. These requests move through a two-stage process:
 
-There are two stages which need to be processed, one is an optional second level validation stage. In this stage the Service Owner can take the Consumers Change Instance tickets and validate them as required before approving them. This validation could be an automated check of an external or related resource, or it could be a simple approval.
+1. **Validation Stage** (Optional): The Service Owner reviews the Change Instance, performing any necessary validation before approval. Validation can be automated or manual.
+   
+2. **Deployment Stage**: Once approved, Change Instances are implemented in the infrastructure.
 
 #### Validation Stage
 
-![level-6-change-validation](../../images/level6_so_change_validation.gif)
+<img src="../../images/level6_so_change_validation.gif" alt="level-6-change-validation" width="1000">
 
-The process for automating this validation would be performed by any automation script such as ansible or a third party tool. The basic operation is as follows:
+The validation stage can be automated using tools like Ansible or third-party platforms. The process typically follows these steps:
 
-The general processing of these changes will be the following:
-
-1. Service Owner team gets the PENDING changes from the NetOrca API
-2. Service Owner playbook validates the changes
-3. If valid the changes are marked as APPROVED
+1. Retrieve PENDING Change Instances from the NetOrca API.
+2. Use a playbook or script to validate the changes.
+3. If valid, mark the Change Instances as APPROVED.
 
 #### Deployment Stage
 
-![level-6-change-submission](../../images/levl6_so_ChangeProcessing.gif)
+<img src="../../images/levl6_so_ChangeProcessing.gif" alt="level-6-change-submission" width="1000">
 
-The general processing of these changes will be the following:
+After validation, the Service Owner team deploys approved changes:
 
-1. Service Owner team gets the APPROVED changes from the NetOrca API
-2. Service Owner playbook extracts the Consumer ServiceItem declarations and converts them into AS3.
-3. The AS3 is submitted to the BigIP devices
-4. If successfully submitted the ChangeInstance is marked as COMPLETED.
+1. Retrieve APPROVED Change Instances from the NetOrca API.
+2. Extract the Consumer's Service Item declarations and convert them into AS3 format.
+3. Submit the AS3 declarations to BigIP devices.
+4. If successful, mark the Change Instance as COMPLETED.
 
-This general process works for CREATE, DELETE and MODIFICATION of ServiceItems and can be completed imperatively or declaratively. 
+This process applies to CREATE, MODIFY, and DELETE operations and can be performed either imperatively or declaratively.
 
-## Change Instance state Lifecycle
-Change Instance Lifecycle is as follows:
-- **PENDING** - Change Instance is created and waits for approval/validation by Service Owner.
-- **PENDING -> APPROVED** - Change Instance is approved by Service Owner
-- **PENDING -> REJECTED** - Change Instance is rejected by Service Owner because of some validation/compliance issues.
+## Change Instance Lifecycle
+Change Instances move through the following states:
 
-<br>
+- **PENDING**: The Change Instance is created and awaits validation or approval.
+- **PENDING → APPROVED**: The Change Instance is validated and approved.
+- **PENDING → REJECTED**: The Change Instance fails validation and is rejected.
+  
+- **APPROVED**: The Change Instance is ready for deployment.
+- **APPROVED → COMPLETED**: The Change Instance has been successfully deployed.
+- **APPROVED → ERROR**: The Change Instance failed to deploy due to an error.
 
-- **APPROVED** - Change Instance is approved by Service Owner and is ready for deployment/implementation in the infrastructure.
-- **APPROVED -> COMPLETED** - Change Instance is deployed into the infrastructure and completed.
-- **APPROVED -> ERROR** - Change Instance is not deployed due to some error.
+## Workflow Scenarios
 
-## Workflow scenarios
+### Step 1. Customer Submits a New Service Item
 
-### Step 1. Customer submits a brand new Service Item
+This step is explained in detail in [CUSTOMER_A](../customer_a/README.md) and [CUSTOMER_B](../customer_b/README.md).
 
-> This step is already covered in [CUSTOMER_A](../customer_a/README.md) and [CUSTOMER_B](../customer_b/README.md)
+### Step 2. Service Owner Reviews the Change Instance
 
-
-### Step 2. Service Owner reviews Change Instance generated by Customer request
-> This step takes Change Instance state from PENDING to APPROVED, or PENDING to REJECTED.
-> Depends on the Service configuration, newly created Change Instance can be automatically approved or requires manual approval.
+Service Owners must review Customer requests and either approve or reject the Change Instance. Depending on the Service configuration, Change Instances can be automatically approved or require manual approval.
 
 #### Step 2.1. Change Instance is APPROVED
 
-APPROVED is the ready to deploy state for that Change Instance. 
+Approved Change Instances are ready for deployment. Approval can be configured to occur via:
 
-There are multiple configurable options for approval including:
-- PreApproved changes
-- Approval via GUI
-- Approval via API
+- Pre-approval
+- GUI-based approval
+- API-based approval
 
-These are covered in detail in the NetOrca docs.
+Refer to the NetOrca documentation for more details.
 
-### Step 3. Change Instance is deployed
-> This step takes Change Instance state from APPROVED to COMPLETED.
-> This is the most important step in the workflow as it effectively implements the Customer request.
-> Process is usually automated with some orchestration tool like Ansible or Terraform and is solely managed by Service Owner team.
-> Goal of this step is to:
-> * fetch all Change Instances that are in APPROVED state for Service X
-> * do some custom logic (if needed) like filter by environment or other parameters
-> * extract declarations from Service Items linked to Change Instances
-> * translate declarations into format that is supported by the infrastructure (for example BIG-IP AS3 declaration), add custom logic (if needed) like splitting into multiple partitions, adding custom objects, requesting objects in external systems etc.
-> * deploy it onto the F5 infrastructure and/or other external systems if needed
-> * mark Change Instances as COMPLETED if automation run is successful
+### Step 3. Change Instance is Deployed
 
+This stage transitions a Change Instance from APPROVED to COMPLETED, effectively implementing the Customer request. Automation tools such as Ansible or Terraform are typically used for deployment. The deployment process generally follows these steps:
 
-#### Step 3.1. Change Instances are automatically deployed with Ansible
+1. Fetch APPROVED Change Instances for a specific Service.
+2. Apply any custom logic (e.g., filtering by environment).
+3. Extract declarations from linked Service Items.
+4. Translate the declarations into a format supported by the infrastructure (e.g., BIG-IP AS3).
+5. Implement any additional logic (e.g., partitioning, object requests to external systems).
+6. Deploy the change and mark the Change Instance as COMPLETED if successful.
 
-In this demo we have set up two Ansible plays that will both validate (move to APPROVED) and deploy (move to COMPLETED) any customer Service Items to a lab F5
+#### Step 3.1. Automated Deployment with Ansible
 
-These are located here:
-[VALIDATION play](https://awx.netorca.io/#/templates/job_template/41/details)
+Two Ansible playbooks are available for validation and deployment:
 
-When you run this play you should see any PENDING change Instances for the LOAD_BALANCER service move to APPROVED
+- [VALIDATION Playbook](https://awx.netorca.io/#/templates/job_template/41/details): Moves PENDING Change Instances to APPROVED.
+- [DEPLOYMENT Playbook](https://awx.netorca.io/#/templates/job_template/42/details): Moves APPROVED Change Instances to COMPLETED by deploying them to F5 infrastructure.
 
-[DEPLOYMENT play](https://awx.netorca.io/#/templates/job_template/42/details)
-
-When you run this play you should see any APPROVED Change Instances for the LOAD_BALANCER service move to COMPLETED. You will also see these load-balancers being deployed onto the lab F5 infrastructure. 
-
-#### Step 3.2. Change Instances are automatically deployed with Terraform
+#### Step 3.2. Automated Deployment with Terraform
 
 ![terraform_deploy](../../images/level6_demo_so_terraform_deploy.gif)
 
-#### Step 3.3. Change Instances are deployed manually
-> Some NetOrca Services may require manual deployment of the infrastructure. For example fragile production environment cannot be automated because safety reasons.
-> You can still accept requests via NetOrca for such scenarios to have a powerful audit trail and visibility into customer requests.
+#### Step 3.3. Manual Deployment
+
+In cases where automation is not feasible (e.g., production environments), manual deployment can be performed while still using NetOrca to maintain audit trails and visibility into Customer requests.
