@@ -190,7 +190,7 @@ application1:
 > - after merge to main branch, CICD pipeline will be triggered and new Service will be available in NetOrca
 > - check the Service in NetOrca Service Catalog
 
-![step-3](../../images/netorca_demo_service_owner.gif)
+![step-3](../../images/netorca_demo_service_definition.gif)
 
 
 ### Step 4. Modify required Service settings in NetOrca GUI
@@ -204,7 +204,7 @@ application1:
 > - "Minimum Schema Version" - Service Owner can set minimum schema version that Customer can request
 >   * Services can be upgraded, this feature allows backward compatibility for already existing Service Items
 
-![step-4](../../images/level6_demo_service_owner_settings.png)
+![step-4](../../images/level6_demo_service_settings.png)
 
 
 ### Step 5. Get familiar with ADVANCED FEATURES (Versioning, Backward Compatibility, Service Configs, Allowed Teams, Dependant Teams)
